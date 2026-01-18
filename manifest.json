@@ -2,8 +2,8 @@
   "name": "CaloTrack - AI Food Scanner & Health Tracker",
   "short_name": "CaloTrack",
   "description": "AI-powered food recognition with Google Gemini Vision for health tracking and nutrition management.",
-  "start_url": "/calotrack/",
-  "scope": "/calotrack/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f0fdf4",
   "theme_color": "#10b981",
@@ -13,13 +13,13 @@
   "categories": ["health", "food", "lifestyle", "medical", "productivity"],
   "icons": [
     {
-      "src": "/calotrack/icon-192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/calotrack/icon-512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

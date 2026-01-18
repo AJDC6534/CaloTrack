@@ -2057,6 +2057,16 @@
             }
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+    // Auth tab switching
+    document.querySelectorAll('.auth-tab').forEach(button => {
+        button.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            switchAuthTab(tab);
+        });
+    });
+});
+
         function switchAuthTab(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
@@ -3988,18 +3998,11 @@ Respond in this EXACT JSON format (no markdown, no backticks):
             deferredPrompt = null;
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-    // Auth tab switching
-    document.querySelectorAll('.auth-tab').forEach(button => {
-        button.addEventListener('click', function() {
-            const tab = this.dataset.tab;
-            switchAuthTab(tab);
-        });
-    });
-});
+        
     </script>
 </body>
 </html>
+
 
 
 

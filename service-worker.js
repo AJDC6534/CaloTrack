@@ -1,12 +1,15 @@
-// CaloTrack PWA Service Worker - Netlify Version
-const CACHE_NAME = 'calotrack-v1.2';
+// CaloTrack PWA Service Worker - GitHub Pages Fix
+const CACHE_NAME = 'calotrack-v1.1';
+
+// IMPORTANT: Update this to match your GitHub Pages path
+const BASE_PATH = '/calotrack';  // Change if your repo name is different
 
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  `${BASE_PATH}/`,
+  `${BASE_PATH}/index.html`,
+  `${BASE_PATH}/manifest.json`,
+  `${BASE_PATH}/icon-192.png`,
+  `${BASE_PATH}/icon-512.png`
 ];
 
 // Install event - cache essential files
@@ -52,7 +55,9 @@ self.addEventListener('fetch', (event) => {
         });
       })
       .catch(() => {
-        console.log('📡 Service Worker: Offline mode');
+        console.log('📡 Service Worker: Offline mode - no cache available');
+        // Return offline page if you have one
+        // return caches.match(`${BASE_PATH}/offline.html`);
       })
   );
 });

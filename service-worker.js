@@ -1,25 +1,22 @@
-// CaloTrack PWA Service Worker
-const CACHE_NAME = 'calotrack-v1.0';
+const CACHE_NAME = 'calotrack-v1.1';
+const BASE_PATH = '/calotrack';  // Your repo name
+
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  `${BASE_PATH}/`,
+  `${BASE_PATH}/index.html`,
+  `${BASE_PATH}/manifest.json`,
+  `${BASE_PATH}/icon-192.png`,
+  `${BASE_PATH}/icon-512.png`
 ];
 
-// Install event
 self.addEventListener('install', (event) => {
-  console.log('🔧 Service Worker: Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('✅ Service Worker: Caching files');
-        return cache.addAll(urlsToCache);
-      })
+      .then((cache) => cache.addAll(urlsToCache))
       .then(() => self.skipWaiting())
   );
 });
 
-// Fetch event
 self.addEventListener('fetch', (event) => {
   if (!event.request.url.startsWith(self.location.origin)) return;
   
@@ -29,9 +26,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate event
 self.addEventListener('activate', (event) => {
-  console.log('✨ Service Worker: Activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(

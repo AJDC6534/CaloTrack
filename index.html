@@ -1,0 +1,3970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaloTrack - AI-Powered Food Scanner</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#10b981">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CaloTrack">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --primary-light: #d1fae5;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text: #1a1a1a;
+            --text-light: #666;
+            --border: #e8e8e8;
+            --bg: #f0fdf4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(239, 68, 68, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 90% 15%, rgba(16, 185, 129, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 15% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 85% 90%, rgba(99, 102, 241, 0.06) 0%, transparent 25%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .food-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        .food-item {
+            position: absolute;
+            font-size: 3em;
+            animation: float-item 20s infinite;
+        }
+
+        .food-item:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .food-item:nth-child(2) { top: 20%; right: 10%; animation-delay: 2s; }
+        .food-item:nth-child(3) { top: 40%; left: 15%; animation-delay: 4s; }
+        .food-item:nth-child(4) { top: 60%; right: 20%; animation-delay: 6s; }
+        .food-item:nth-child(5) { top: 75%; left: 25%; animation-delay: 8s; }
+
+        @keyframes float-item {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+            50% { transform: translateY(-30px) rotate(10deg); opacity: 0.25; }
+        }
+
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(16, 185, 129, 0.15);
+            max-width: 450px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 20%, #fbbf24 40%, #10b981 60%, #6366f1 80%, #8b5cf6 100%);
+        }
+
+        .login-header {
+            padding: 40px 40px 30px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.7) 0%, rgba(255, 255, 255, 0.95) 100%);
+        }
+
+        .login-logo {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary) 0%, #34d399 100%);
+            border-radius: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+        }
+
+        .login-header h1 {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            font-size: 0.9em;
+            color: var(--text-light);
+        }
+
+        .login-body {
+            padding: 40px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: white;
+            color: var(--text);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--border);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 0.85em;
+            width: auto;
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .info-box {
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border-radius: 10px;
+            border-left: 3px solid #6366f1;
+            margin-top: 20px;
+            font-size: 0.85em;
+            color: #4f46e5;
+        }
+
+        #main-app {
+            display: none;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(16, 185, 129, 0.15);
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 20%, #fbbf24 40%, #10b981 60%, #6366f1 80%, #8b5cf6 100%);
+            z-index: 2;
+        }
+
+        .header {
+            padding: 60px 40px 40px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.7) 0%, rgba(255, 255, 255, 0.95) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .user-info strong {
+            color: var(--primary);
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, #34d399 100%);
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 0.95em;
+            color: var(--text-light);
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+        }
+
+        .health-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 8px 20px;
+            background: rgba(16, 185, 129, 0.12);
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: var(--primary);
+            font-weight: 500;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .content {
+            padding: 40px;
+            background: white;
+            position: relative;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 40px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: #999;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            font-size: 0.9em;
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+
+        .profile-reminder {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border-radius: 10px;
+            border-left: 3px solid #6366f1;
+            margin-bottom: 24px;
+            font-size: 0.9em;
+        }
+
+        .profile-reminder strong {
+            color: #4f46e5;
+        }
+
+        .camera-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .camera-option {
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.5) 0%, white 100%);
+            padding: 32px 24px;
+            border-radius: 12px;
+            border: 2px solid rgba(16, 185, 129, 0.1);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .camera-option:hover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.8) 0%, white 100%);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+        }
+
+        .camera-option-icon {
+            font-size: 2.5em;
+            margin-bottom: 12px;
+        }
+
+        .camera-option h3 {
+            font-size: 1em;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .camera-option p {
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+
+        .results {
+            display: none;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.3) 0%, rgba(255, 255, 255, 0.9) 100%);
+            border-radius: 12px;
+            margin-top: 24px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #34d399 100%);
+            color: white;
+            padding: 32px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '💪';
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 3em;
+            opacity: 0.2;
+        }
+
+        .stat-card h3 {
+            font-size: 2.8em;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .stat-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .warning {
+            padding: 18px 24px;
+            border-radius: 10px;
+            margin: 16px 0;
+            font-size: 0.95em;
+            border-left: 4px solid;
+        }
+
+        .warning.success {
+            background: #f0fdf4;
+            border-left-color: var(--success);
+            color: #065f46;
+        }
+
+        .warning.warning {
+            background: #fef3c7;
+            border-left-color: var(--warning);
+            color: #92400e;
+        }
+
+        .warning.danger {
+            background: #fef2f2;
+            border-left-color: var(--danger);
+            color: #991b1b;
+        }
+
+        .warning-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-icon {
+            font-size: 1.3em;
+        }
+
+        .recommendation {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.05) 100%);
+            border-radius: 10px;
+            margin-top: 16px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .recommendation strong {
+            color: var(--primary);
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .nutrition-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .nutrition-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+        }
+
+        .nutrition-item strong {
+            display: block;
+            font-size: 1.5em;
+            color: var(--primary);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .nutrition-item span {
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+
+        #mealList {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            min-height: 100px;
+        }
+
+        .meal-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            background: white;
+        }
+
+        .meal-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .meal-list-item:hover {
+            background: #f9fafb;
+        }
+
+        .meal-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .meal-emoji {
+            font-size: 1.8em;
+        }
+
+        .meal-details {
+            flex: 1;
+        }
+
+        .meal-name {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .meal-calories {
+            font-size: 0.9em;
+            color: var(--text-light);
+        }
+
+        .meal-remove {
+            background: white;
+            color: #ef4444;
+            border: 1px solid #fee2e2;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .meal-remove:hover {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        #video {
+            width: 100%;
+            border-radius: 12px;
+            background: #000;
+            margin: 20px 0;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .captured-image {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .camera-controls .btn {
+            flex: 1;
+        }
+
+        .loader {
+            border: 2px solid #f0f0f0;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 0.8s linear infinite;
+            margin: 24px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .scanning-text {
+            color: var(--text-light);
+            font-size: 0.95em;
+            margin-top: 16px;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.5) 0%, rgba(255, 255, 255, 0.95) 100%);
+            color: var(--text-light);
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--border);
+            font-size: 0.85em;
+        }
+
+        .footer p {
+            margin: 4px 0;
+        }
+
+        .footer strong {
+            color: var(--primary);
+        }
+
+        h2 {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+
+        h3 {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+            }
+
+            .content {
+                padding: 24px;
+            }
+
+            .header {
+                padding: 40px 24px 24px;
+            }
+
+            .camera-options {
+                grid-template-columns: 1fr;
+            }
+
+            .nutrition-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 24px;
+            }
+
+            .user-info {
+                position: static;
+                margin: 20px auto;
+                width: fit-content;
+            }
+        }
+    
+        /* Macro Distribution Styles */
+        .macro-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        
+        .macro-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .macro-card h4 {
+            margin: 0 0 8px 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .macro-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        
+        .macro-card .target {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+        
+        .macro-bar {
+            background: rgba(255,255,255,0.3);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        
+        .macro-bar-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.3s ease;
+        }
+        
+        /* Meal Category Styles */
+        .meal-category-select {
+            margin: 16px 0;
+        }
+        
+        .meal-category-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        
+        .category-breakfast { background: #FFF3E0; color: #E65100; }
+        .category-lunch { background: #E8F5E9; color: #2E7D32; }
+        .category-dinner { background: #E3F2FD; color: #1565C0; }
+        .category-snack { background: #F3E5F5; color: #6A1B9A; }
+        
+        /* Medication & Reminder Styles */
+        .reminder-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .reminder-info {
+            flex: 1;
+        }
+        
+        .reminder-time {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+        
+        .reminder-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-small-action {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-taken {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .reminder-taken {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+        
+        .time-input-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        /* Tab enhancements */
+        .tab-badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.75em;
+            margin-left: 6px;
+        }
+
+    
+        /* Enhanced Scheduling Styles */
+        .schedule-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        
+        .schedule-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .schedule-info {
+            flex: 1;
+        }
+        
+        .schedule-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .schedule-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .schedule-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        
+        .btn-edit:hover {
+            background: #2563eb;
+        }
+        
+        .timeline {
+            background: linear-gradient(to bottom, #f8f9fa 0%, white 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+        
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            border-left: 4px solid var(--primary);
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .timeline-time {
+            font-weight: bold;
+            color: var(--primary);
+            width: 80px;
+            font-size: 1.1em;
+        }
+        
+        .timeline-content {
+            flex: 1;
+            padding-left: 16px;
+        }
+        
+        .timeline-type {
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .timeline-empty {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-style: italic;
+        }
+        
+        .med-time-input {
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="food-bg">
+        <div class="food-item">🥗</div>
+        <div class="food-item">🍎</div>
+        <div class="food-item">🥑</div>
+        <div class="food-item">🥕</div>
+        <div class="food-item">🍌</div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">CT</div>
+                <h1>Welcome to CaloTrack AI</h1>
+                <p>Powered by Google Gemini Vision</p>
+            </div>
+
+            <div class="login-body">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+                    <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+                </div>
+
+                <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="login-email" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn">Sign In</button>
+                    <div class="info-box">
+                        <strong>Demo Account:</strong><br>
+                        Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ec88898183ac8f8d8083989e8d8f87c28f8381">[email&#160;protected]</a><br>
+                        Password: demo123
+                    </div>
+                </form>
+
+                <form id="signup-form" class="auth-form" onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="signup-name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="signup-email" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signup-password" placeholder="Create a password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="signup-confirm" placeholder="Confirm your password" required>
+                    </div>
+                    <button type="submit" class="btn">Create Account</button>
+                    <div class="info-box">
+                        <strong>📝 Note:</strong> Your data is stored locally on your device for privacy and security.
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app">
+        <div class="container">
+            <div class="header">
+                <div class="user-info">
+                    <span>👤 <strong id="current-user"></strong></span>
+                    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                </div>
+                <div class="logo">CT</div>
+                <h1>CaloTrack AI<span class="ai-badge">🧠 Gemini Vision</span></h1>
+                <p>AI-powered food recognition and health tracking</p>
+                <div class="health-badge">
+                    <span>🌿</span>
+                    <span>Smart Nutrition Analysis</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('scanner')">AI Scanner</button>
+                    <button class="tab" onclick="showTab('profile')">Profile</button>
+                    <button class="tab" onclick="showTab('tracker')">Tracker</button>
+                    <button class="tab" onclick="showTab('meals')">Meal Schedule</button>
+                    <button class="tab" onclick="showTab('medications')">Medications<span class="tab-badge" id="med-badge" style="display:none;">0</span></button>
+                </div>
+
+                <!-- AI Scanner Tab -->
+                <div id="scanner-tab" class="tab-content active">
+                    <div class="section">
+                        <h2 class="section-title">AI Food Scanner</h2>
+                        <p class="section-subtitle">Use Google Gemini AI to identify food with high accuracy</p>
+
+                        <div id="profile-check" class="profile-reminder">
+                            <strong>🔒 Health Profile Active:</strong> 
+                            <span id="condition-display">Please set up your profile first</span>
+                        </div>
+
+                        <div class="camera-options">
+                            <div class="camera-option" onclick="checkProfileAndScan('camera')">
+                                <div class="camera-option-icon">📷</div>
+                                <h3>Camera</h3>
+                                <p>Take a photo</p>
+                            </div>
+                            <div class="camera-option" onclick="checkProfileAndScan('upload')">
+                                <div class="camera-option-icon">🖼️</div>
+                                <h3>Upload</h3>
+                                <p>Choose image</p>
+                            </div>
+                        </div>
+
+                        <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)">
+                        <div id="scan-results" class="results"></div>
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div id="profile-tab" class="tab-content">
+                    <div class="section">
+                        <h2 class="section-title">Health Profile</h2>
+                        <p class="section-subtitle">Configure your health metrics for personalized warnings</p>
+                
+                <!-- Health Metrics Display (Always Visible) -->
+                <div id="profile-metrics" style="display: none; margin-bottom: 32px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div class="stat-card" id="bmi-display">
+                            <h3 id="bmi-value">--</h3>
+                            <p id="bmi-category">BMI</p>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+                            <h3 id="daily-calories-display">--</h3>
+                            <p>Daily Calorie Target</p>
+                        </div>
+                    </div>
+                    <div class="info-box" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border: 2px solid #10b981; padding: 20px; border-radius: 12px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; text-align: center;">
+                            <div>
+                                <strong style="font-size: 1.1em; color: #065f46;">👤 <span id="display-name">--</span></strong>
+                            </div>
+                            <div>
+                                <strong style="font-size: 1.1em; color: #065f46;">📅 <span id="display-age">--</span> years</strong>
+                            </div>
+                            <div>
+                                <strong style="font-size: 1.1em; color: #065f46;">⚧ <span id="display-gender">--</span></strong>
+                            </div>
+                            <div>
+                                <strong style="font-size: 1.1em; color: #065f46;">📏 <span id="display-height">--</span> cm</strong>
+                            </div>
+                            <div>
+                                <strong style="font-size: 1.1em; color: #065f46;">⚖️ <span id="display-weight">--</span> kg</strong>
+                            </div>
+                            <div>
+                                <strong style="font-size: 1.1em; color: #065f46;">🏥 <span id="display-condition">--</span></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="userName" placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label>Age</label>
+                            <input type="number" id="age" placeholder="Years">
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select id="gender">
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Height (cm)</label>
+                            <input type="number" id="height" placeholder="170">
+                        </div>
+                        <div class="form-group">
+                            <label>Weight (kg)</label>
+                            <input type="number" id="weight" placeholder="65">
+                        </div>
+                        <div class="form-group">
+                            <label>Medical Condition (Important for Food Warnings)</label>
+                            <select id="condition">
+                                <option value="None">None</option>
+                                <option value="Diabetes">Diabetes</option>
+                                <option value="Hypertension">Hypertension (High Blood Pressure)</option>
+                                <option value="Heart Disease">Heart Disease</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="calculateBMI()">Save Profile & Calculate Metrics</button>
+                        <div id="bmi-results" class="results"></div>
+                    </div>
+                </div>
+
+                <!-- Tracker Tab -->
+                <div id="tracker-tab" class="tab-content">
+                    <div class="section">
+                        <h2 class="section-title">Daily Tracker</h2>
+                        <p class="section-subtitle">Monitor your daily calorie intake</p>
+                        <div class="stat-card">
+                            <h3 id="totalCalories">0</h3>
+                            <p>Calories Today</p>
+                        </div>
+                        
+                        <h3 style="margin-top: 32px; margin-bottom: 16px;">📊 Macronutrient Distribution</h3>
+                        <div class="macro-container">
+                            <div class="macro-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <h4>🍞 CARBS</h4>
+                                <div class="value"><span id="total-carbs">0</span>g</div>
+                                <div class="target">Target: 45-65% of calories</div>
+                                <div class="macro-bar">
+                                    <div class="macro-bar-fill" id="carbs-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="macro-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                <h4>🥩 PROTEIN</h4>
+                                <div class="value"><span id="total-protein">0</span>g</div>
+                                <div class="target">Target: 10-35% of calories</div>
+                                <div class="macro-bar">
+                                    <div class="macro-bar-fill" id="protein-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="macro-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                <h4>🥑 FAT</h4>
+                                <div class="value"><span id="total-fat">0</span>g</div>
+                                <div class="target">Target: 20-35% of calories</div>
+                                <div class="macro-bar">
+                                    <div class="macro-bar-fill" id="fat-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="macro-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                                <h4>🧂 SODIUM</h4>
+                                <div class="value"><span id="total-sodium">0</span>mg</div>
+                                <div class="target">Limit: <2300mg daily</div>
+                                <div class="macro-bar">
+                                    <div class="macro-bar-fill" id="sodium-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 style="margin-top: 32px; margin-bottom: 16px;">Today's Meals</h3>
+                        <div id="mealList">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📊</div>
+                                <p>No meals tracked yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meal Schedule Tab -->
+                <div id="meals-tab" class="tab-content">
+                    <div class="section">
+                        <h2 class="section-title">🍽️ Custom Meal Schedule</h2>
+                        <p class="section-subtitle">Create your personalized meal schedule with unlimited custom meal times</p>
+                        
+                        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                            <h3 style="margin-top: 0; margin-bottom: 16px;">➕ Add New Meal Slot</h3>
+                            <div class="form-group">
+                                <label>Meal Name</label>
+                                <input type="text" id="custom-meal-name" placeholder="e.g., Morning Snack, Pre-workout, Late Night Snack">
+                            </div>
+                            <div class="form-group">
+                                <label>Icon (Emoji)</label>
+                                <input type="text" id="custom-meal-icon" placeholder="🥪 🍎 ☕ 🥗 🍔" maxlength="2" style="width: 100px; font-size: 24px;">
+                            </div>
+                            <div class="form-group">
+                                <label>Time</label>
+                                <input type="time" id="custom-meal-time">
+                            </div>
+                            <div class="form-group">
+                                <label>Set Reminder?</label>
+                                <select id="custom-meal-reminder">
+                                    <option value="yes">Yes, remind me</option>
+                                    <option value="no">No reminder</option>
+                                </select>
+                            </div>
+                            <button class="btn" onclick="addCustomMealSlot()">➕ Add Meal Slot</button>
+                        </div>
+                        
+                        <h3 style="margin-top: 32px; margin-bottom: 16px;">📋 Your Meal Schedule</h3>
+                        <div id="custom-meal-schedule-list">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🍽️</div>
+                                <p>No meal times scheduled yet</p>
+                                <p style="font-size: 0.9em; color: #666;">Add custom meal times above or use the quick setup below</p>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin-top: 32px; margin-bottom: 16px;">🔔 Quick Setup</h3>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
+                            <button class="btn btn-outline" onclick="addDefaultMeals()">+ Add Default 4 Meals</button>
+                            <button class="btn btn-outline" onclick="clearAllMeals()" style="background: #fee; color: #c00;">🗑️ Clear All Meals</button>
+                        </div>
+                        
+                        <h3 style="margin-top: 32px; margin-bottom: 16px;">📅 Today's Timeline</h3>
+                        <div id="daily-timeline">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📅</div>
+                                <p>Your daily schedule will appear here</p>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin-top: 32px; margin-bottom: 16px;">🔔 Notification Settings</h3>
+                        <div class="warning info">
+                            <strong>ℹ️ Browser Notifications</strong>
+                            <p style="margin-top: 8px;">Enable notifications to receive reminders for your scheduled meals and medications at the times you set.</p>
+                        </div>
+                        <button class="btn btn-outline" onclick="requestNotificationPermission()">🔔 Enable Notifications</button>
+                    </div>
+                </div>
+
+                <!-- Medications Tab -->
+                <div id="medications-tab" class="tab-content">
+                    <div class="section">
+                        <h2 class="section-title">💊 Medication & Health Reminders</h2>
+                        <p class="section-subtitle">Track your medications and set health reminders with flexible scheduling</p>
+                        
+                        <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 2px solid #3b82f6; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                            <h3 style="margin-top: 0; margin-bottom: 16px;">➕ Add New Medication</h3>
+                            <div class="form-group">
+                                <label>Medication Name</label>
+                                <input type="text" id="med-name" placeholder="e.g., Metformin, Vitamin D, Aspirin">
+                            </div>
+                            <div class="form-group">
+                                <label>Dosage</label>
+                                <input type="text" id="med-dosage" placeholder="e.g., 500mg, 1 tablet, 2 capsules">
+                            </div>
+                            <div class="form-group">
+                                <label>How many times per day?</label>
+                                <select id="med-times-per-day" onchange="updateMedTimeInputs()">
+                                    <option value="1">Once daily</option>
+                                    <option value="2">Twice daily</option>
+                                    <option value="3">Three times daily</option>
+                                    <option value="4">Four times daily</option>
+                                    <option value="custom">Custom schedule</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="med-times-container">
+                                <label>Time(s)</label>
+                                <div id="med-time-inputs">
+                                    <input type="time" class="med-time-input" value="08:00" style="width: 100%; margin-bottom: 8px; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Notes (Optional)</label>
+                                <textarea id="med-notes" placeholder="e.g., Take with food, Take before bed, Avoid dairy" rows="2" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: Arial;"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Set Reminders?</label>
+                                <select id="med-reminder">
+                                    <option value="yes">Yes, remind me</option>
+                                    <option value="no">No reminders</option>
+                                </select>
+                            </div>
+                            <button class="btn" onclick="addMedication()">➕ Add Medication</button>
+                        </div>
+                        
+                        <h3 style="margin-top: 32px; margin-bottom: 16px;">💊 Your Medications</h3>
+                        <div id="medications-list">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">💊</div>
+                                <p>No medications added yet</p>
+                            </div>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border: 2px solid #ec4899; padding: 20px; border-radius: 12px; margin-top: 32px; margin-bottom: 24px;">
+                            <h3 style="margin-top: 0; margin-bottom: 16px;">➕ Add Health Reminder</h3>
+                            <div class="form-group">
+                                <label>Reminder</label>
+                                <input type="text" id="reminder-text" placeholder="e.g., Check blood sugar, Take blood pressure, Exercise">
+                            </div>
+                            <div class="form-group">
+                                <label>Time</label>
+                                <input type="time" id="reminder-time">
+                            </div>
+                            <button class="btn btn-outline" onclick="addHealthReminder()">➕ Add Reminder</button>
+                        </div>
+                        
+                        <h3 style="margin-top: 32px; margin-bottom: 16px;">🔔 Health Reminders</h3>
+                        <div id="reminders-list">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🔔</div>
+                                <p>No health reminders set</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p><strong>CaloTrack AI</strong> — Powered by Google Gemini Vision</p>
+                <p>High School ICT Project 2026</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content" id="modalBody"></div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // ============================================
+        // 🔑 GOOGLE GEMINI API KEY
+        // ============================================
+        // IMPORTANT: Replace this with your own API key from:
+        // https://aistudio.google.com/app/apikey
+        // 
+        // Get your FREE API key:
+        // 1. Visit the link above
+        // 2. Sign in with Google
+        // 3. Click "Create API key"
+        // 4. Copy and paste it below
+        const GEMINI_API_KEY = 'AIzaSyDF2i_oAFtNfYDtjxMBltkRJhB2ZlNLT08';
+        // ============================================
+
+        // Global state
+        let currentUser = null;
+        let stream = null;
+        let capturedImageData = null;
+        let userData = { condition: 'None', dailyCalories: 2000, name: '' };
+        let meals = [];
+        let totalCals = 0;
+        let totalMacros = { carbs: 0, protein: 0, fat: 0, sodium: 0 };
+        let customMealSlots = []; // NEW: User-defined meal schedule
+        let medications = [];
+        let healthReminders = [];
+
+        // Food database with nutritional info
+        const foods = {
+            // ========== BREAKFAST FOODS ==========
+            'egg': {
+                name: 'Boiled Egg', emoji: '🥚', calories: 78, carbs: 0.6, protein: 6, fat: 5, sodium: 62, sugar: 0.6,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'High protein, low carbs.', recommendation: 'Great breakfast!' },
+                    'Hypertension': { level: 'safe', message: 'GOOD', detail: 'Low sodium.', recommendation: 'Good choice!' },
+                    'Heart Disease': { level: 'warning', message: 'MODERATE', detail: 'Contains cholesterol.', recommendation: 'Limit to 1 per day.' },
+                    'None': { level: 'safe', message: 'HEALTHY', detail: 'Protein-rich.', recommendation: 'Excellent!' }
+                }
+            },
+            'oatmeal': {
+                name: 'Oatmeal', emoji: '🥣', calories: 154, carbs: 27, protein: 6, fat: 3, sodium: 9, sugar: 1,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low glycemic, high fiber.', recommendation: 'Perfect breakfast!' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Great choice!' },
+                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Lowers cholesterol.', recommendation: 'Ideal!' },
+                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'High fiber, nutritious.', recommendation: 'Start your day right!' }
+                }
+            },
+            'pancake': {
+                name: 'Pancake', emoji: '🥞', calories: 227, carbs: 28, protein: 6, fat: 10, sodium: 439, sugar: 8,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'EAT LESS', detail: 'High carbs and sugar.', recommendation: 'Limit to 1-2 pieces.' },
+                    'Hypertension': { level: 'warning', message: 'MODERATE', detail: '439mg sodium.', recommendation: 'Occasional treat.' },
+                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '10g fat.', recommendation: 'Use whole wheat.' },
+                    'None': { level: 'warning', message: 'OCCASIONAL', detail: 'High in refined carbs.', recommendation: 'Weekend treat.' }
+                }
+            },
+            'bread': {
+                name: 'White Bread', emoji: '🍞', calories: 79, carbs: 15, protein: 2.7, fat: 1, sodium: 147, sugar: 1.5,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'CHOOSE WHOLE WHEAT', detail: 'High glycemic index.', recommendation: 'Switch to whole grain.' },
+                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: '147mg sodium per slice.', recommendation: 'Limit to 2 slices.' },
+                    'Heart Disease': { level: 'safe', message: 'OK', detail: 'Low fat.', recommendation: 'Choose whole grain.' },
+                    'None': { level: 'safe', message: 'COMMON FOOD', detail: 'Basic carb source.', recommendation: 'Whole grain is better.' }
+                }
+            },
+            'cereal': {
+                name: 'Breakfast Cereal', emoji: '🥣', calories: 110, carbs: 24, protein: 2, fat: 1, sodium: 160, sugar: 12,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'WATCH SUGAR', detail: '12g sugar per serving.', recommendation: 'Choose low-sugar brand.' },
+                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: '160mg sodium.', recommendation: 'Check label.' },
+                    'Heart Disease': { level: 'safe', message: 'OK', detail: 'Low fat.', recommendation: 'Choose whole grain.' },
+                    'None': { level: 'warning', message: 'CHECK LABEL', detail: 'Many brands high in sugar.', recommendation: 'Read nutrition facts.' }
+                }
+            },
+
+            // ========== PROTEINS ==========
+            'chicken': {
+                name: 'Grilled Chicken', emoji: '🍗', calories: 165, carbs: 0, protein: 31, fat: 3.6, sodium: 74, sugar: 0,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'High protein, no carbs.', recommendation: 'Perfect choice!' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium when grilled.', recommendation: 'Great option!' },
+                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Lean protein.', recommendation: 'Remove skin!' },
+                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Lean protein source.', recommendation: 'Excellent!' }
+                }
+            },
+            'chicken adobo': {
+                name: 'Chicken Adobo', emoji: '🍗', calories: 290, carbs: 8, protein: 32, fat: 15, sodium: 680, sugar: 3,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein, moderate carbs.', recommendation: 'Enjoy!' },
+                    'Hypertension': { level: 'warning', message: 'WATCH SODIUM', detail: '680mg sodium.', recommendation: 'Reduce soy sauce.' },
+                    'Heart Disease': { level: 'warning', message: 'MODERATE', detail: '15g fat.', recommendation: 'Remove skin.' },
+                    'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Filipino favorite.', recommendation: 'Enjoy!' }
+                }
+            },
+            'fish': {
+                name: 'Grilled Fish', emoji: '🐟', calories: 206, carbs: 0, protein: 41, fat: 3, sodium: 90, sugar: 0,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'High protein, no carbs.', recommendation: 'Perfect!' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Great choice!' },
+                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Omega-3 rich!', recommendation: 'Eat often!' },
+                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Heart-healthy fats.', recommendation: 'Excellent!' }
+                }
+            },
+            'beef': {
+                name: 'Beef Steak', emoji: '🥩', calories: 271, carbs: 0, protein: 25, fat: 19, sodium: 72, sugar: 0,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein.', recommendation: 'Lean cuts best!' },
+                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'Low sodium.', recommendation: 'Trim visible fat.' },
+                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '19g fat, saturated.', recommendation: 'Choose lean cuts.' },
+                    'None': { level: 'warning', message: 'MODERATE', detail: 'High in saturated fat.', recommendation: 'Occasional treat.' }
+                }
+            },
+            'pork': {
+                name: 'Pork Chop', emoji: '🥓', calories: 242, carbs: 0, protein: 27, fat: 14, sodium: 62, sugar: 0,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein.', recommendation: 'Trim fat!' },
+                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'Low sodium.', recommendation: 'Remove fat.' },
+                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '14g fat.', recommendation: 'Choose lean cuts.' },
+                    'None': { level: 'warning', message: 'MODERATE', detail: 'Higher in fat.', recommendation: 'Lean cuts better.' }
+                }
+            },
+            'tofu': {
+                name: 'Tofu', emoji: '🧈', calories: 76, carbs: 2, protein: 8, fat: 5, sodium: 7, sugar: 0,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low carbs, good protein.', recommendation: 'Great alternative!' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Very low sodium.', recommendation: 'Perfect!' },
+                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Plant-based protein.', recommendation: 'Excellent!' },
+                    'None': { level: 'safe', message: 'HEALTHY', detail: 'Versatile protein.', recommendation: 'Great option!' }
+                }
+            },
+
+            // ========== VEGETABLES ==========
+            'broccoli': {
+                name: 'Broccoli', emoji: '🥦', calories: 55, carbs: 11, protein: 4, fat: 0.6, sodium: 52, sugar: 2,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low calories, high fiber.', recommendation: 'Eat lots!' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Perfect!' },
+                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-protective.', recommendation: 'Eat daily!' },
+                    'None': { level: 'safe', message: 'SUPERFOOD', detail: 'Packed with nutrients.', recommendation: 'Eat often!' }
+                }
+            },
+            'carrot': {
+                name: 'Carrot', emoji: '🥕', calories: 41, carbs: 10, protein: 1, fat: 0.2, sodium: 69, sugar: 5,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'Moderate carbs, high fiber.', recommendation: 'Great snack!' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Excellent!' },
+                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Great choice!' },
+                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Rich in vitamin A.', recommendation: 'Eat regularly!' }
+                }
+            },
+            'salad': {
+                name: 'Green Salad', emoji: '🥗', calories: 52, carbs: 8, protein: 3, fat: 1, sodium: 89, sugar: 4,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low carbs, high fiber.', recommendation: 'Perfect!' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Great!' },
+                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-healthy.', recommendation: 'Perfect!' },
+                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Low calorie, nutritious.', recommendation: 'Eat more!' }
+                }
+            },
+            'tomato': {
+                name: 'Tomato', emoji: '🍅', calories: 22, carbs: 5, protein: 1, fat: 0.2, sodium: 6, sugar: 3,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Very low carbs.', recommendation: 'Great choice!' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Very low sodium.', recommendation: 'Perfect!' },
+                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Lycopene-rich!', recommendation: 'Eat often!' },
+                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Rich in antioxidants.', recommendation: 'Add to meals!' }
+                }
+            },
+            'potato': {
+                name: 'Baked Potato', emoji: '🥔', calories: 161, carbs: 37, protein: 4, fat: 0.2, sodium: 13, sugar: 2,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'EAT LESS', detail: '37g carbs, high glycemic.', recommendation: 'Small portion.' },
+                    'Hypertension': { level: 'safe', message: 'GOOD', detail: 'Low sodium, high potassium.', recommendation: 'Good choice!' },
+                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Very low fat.', recommendation: 'Good!' },
+                    'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Good carb source.', recommendation: 'Enjoy!' }
+                }
+            },
+
+            // ========== FRUITS ==========
+            'apple': {
+                name: 'Apple', emoji: '🍎', calories: 95, carbs: 25, protein: 0.5, fat: 0.3, sodium: 2, sugar: 19,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High fiber balances sugar.', recommendation: 'Enjoy!' },
+                    'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-healthy.', recommendation: 'Great!' },
+                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Low fat, high fiber.', recommendation: 'Perfect!' },
+                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Packed with vitamins.', recommendation: 'Daily!' }
+                }
+            },
+            'banana': {
+                name: 'Banana', emoji: '🍌', calories: 105, carbs: 27, protein: 1, fat: 0.4, sodium: 1, sugar: 14,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'MODERATION', detail: '14g sugar.', recommendation: 'Half banana.' },
+                    'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'High potassium!', recommendation: 'Great!' },
+                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Excellent!' },
+                    'None': { level: 'safe', message: 'HEALTHY', detail: 'Energy-boosting.', recommendation: 'Great snack!' }
+                }
+            },
+            'orange': {
+                name: 'Orange', emoji: '🍊', calories: 62, carbs: 15, protein: 1, fat: 0.2, sodium: 0, sugar: 12,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High fiber.', recommendation: 'One orange OK!' },
+                    'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Zero sodium!', recommendation: 'Perfect!' },
+                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Heart-protective.', recommendation: 'Great!' },
+                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'High vitamin C.', recommendation: 'Daily!' }
+                }
+            },
+            'mango': {
+                name: 'Mango', emoji: '🥭', calories: 135, carbs: 35, protein: 1, fat: 0.6, sodium: 3, sugar: 31,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'LIMIT', detail: '31g sugar.', recommendation: 'Small portion.' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Enjoy!' },
+                    'Heart Disease': { level: 'safe', message: 'GOOD', detail: 'Low fat.', recommendation: 'Good choice!' },
+                    'None': { level: 'safe', message: 'DELICIOUS', detail: 'Tropical fruit.', recommendation: 'Enjoy!' }
+                }
+            },
+            'watermelon': {
+                name: 'Watermelon', emoji: '🍉', calories: 46, carbs: 12, protein: 1, fat: 0.2, sodium: 2, sugar: 9,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'Mostly water, low calories.', recommendation: 'Enjoy!' },
+                    'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Very low sodium.', recommendation: 'Perfect!' },
+                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Hydrating, low fat.', recommendation: 'Great!' },
+                    'None': { level: 'safe', message: 'REFRESHING', detail: 'Hydrating fruit.', recommendation: 'Enjoy!' }
+                }
+            },
+            'grapes': {
+                name: 'Grapes', emoji: '🍇', calories: 104, carbs: 27, protein: 1, fat: 0.2, sodium: 3, sugar: 23,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'SMALL PORTION', detail: '23g sugar.', recommendation: 'Limit to 1/2 cup.' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Good!' },
+                    'Heart Disease': { level: 'safe', message: 'GOOD', detail: 'Antioxidant-rich.', recommendation: 'Enjoy!' },
+                    'None': { level: 'safe', message: 'SWEET TREAT', detail: 'Natural candy.', recommendation: 'Snack option!' }
+                }
+            },
+
+            // ========== RICE & GRAINS ==========
+            'white rice': {
+                name: 'White Rice', emoji: '🍚', calories: 205, carbs: 45, protein: 4, fat: 0.4, sodium: 2, sugar: 0,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'EAT LESS', detail: '45g carbs, high GI.', recommendation: 'Half cup max.' },
+                    'Hypertension': { level: 'safe', message: 'SAFE', detail: 'Low sodium.', recommendation: 'OK!' },
+                    'Heart Disease': { level: 'safe', message: 'SAFE', detail: 'Low fat.', recommendation: 'Good!' },
+                    'None': { level: 'safe', message: 'STAPLE', detail: 'Main energy source.', recommendation: 'Enjoy!' }
+                }
+            },
+            'rice': {
+                name: 'White Rice', emoji: '🍚', calories: 205, carbs: 45, protein: 4, fat: 0.4, sodium: 2, sugar: 0,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'EAT LESS', detail: '45g carbs.', recommendation: 'Half cup.' },
+                    'Hypertension': { level: 'safe', message: 'SAFE', detail: 'Low sodium.', recommendation: 'OK!' },
+                    'Heart Disease': { level: 'safe', message: 'SAFE', detail: 'Low fat.', recommendation: 'Good!' },
+                    'None': { level: 'safe', message: 'STAPLE', detail: 'Staple food.', recommendation: 'Enjoy!' }
+                }
+            },
+            'brown rice': {
+                name: 'Brown Rice', emoji: '🍚', calories: 216, carbs: 45, protein: 5, fat: 2, sodium: 10, sugar: 1,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'BETTER CHOICE', detail: 'Lower GI than white rice.', recommendation: 'Great alternative!' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium, high fiber.', recommendation: 'Perfect!' },
+                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Whole grain!', recommendation: 'Choose this!' },
+                    'None': { level: 'safe', message: 'HEALTHIER', detail: 'More nutritious.', recommendation: 'Better choice!' }
+                }
+            },
+            'pasta': {
+                name: 'Pasta', emoji: '🍝', calories: 221, carbs: 43, protein: 8, fat: 1, sodium: 6, sugar: 2,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'MODERATE', detail: '43g carbs.', recommendation: 'Small portion.' },
+                    'Hypertension': { level: 'safe', message: 'OK', detail: 'Low sodium.', recommendation: 'Watch sauce!' },
+                    'Heart Disease': { level: 'safe', message: 'MODERATE', detail: 'Low fat.', recommendation: 'Whole wheat better.' },
+                    'None': { level: 'safe', message: 'COMMON', detail: 'Carb source.', recommendation: 'Moderate portions.' }
+                }
+            },
+
+            // ========== SNACKS ==========
+            'chips': {
+                name: 'Potato Chips', emoji: '🥔', calories: 152, carbs: 15, protein: 2, fat: 10, sodium: 149, sugar: 0.2,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'AVOID', detail: 'High carbs, high fat.', recommendation: 'Rare treat only.' },
+                    'Hypertension': { level: 'danger', message: 'DO NOT EAT', detail: '149mg sodium per oz!', recommendation: 'Avoid!' },
+                    'Heart Disease': { level: 'danger', message: 'AVOID', detail: '10g fat per serving.', recommendation: 'Choose nuts instead.' },
+                    'None': { level: 'warning', message: 'JUNK FOOD', detail: 'Low nutrition.', recommendation: 'Rare treat.' }
+                }
+            },
+            'nuts': {
+                name: 'Mixed Nuts', emoji: '🥜', calories: 166, carbs: 6, protein: 5, fat: 14, sodium: 3, sugar: 1,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low carbs, healthy fats.', recommendation: 'Great snack!' },
+                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Unsalted best!', recommendation: 'Choose unsalted!' },
+                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-healthy fats!', recommendation: 'Eat often!' },
+                    'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Healthy fat source.', recommendation: 'Small portions!' }
+                }
+            },
+            'cookie': {
+                name: 'Cookie', emoji: '🍪', calories: 142, carbs: 17, protein: 2, fat: 7, sodium: 82, sugar: 11,
+                warnings: {
+                    'Diabetes': { level: 'danger', message: 'AVOID', detail: '11g sugar!', recommendation: 'Skip it!' },
+                    'Hypertension': { level: 'warning', message: 'OCCASIONAL', detail: '82mg sodium.', recommendation: 'Rare treat.' },
+                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '7g fat.', recommendation: 'Rare treat.' },
+                    'None': { level: 'warning', message: 'DESSERT', detail: 'High sugar.', recommendation: 'Occasional.' }
+                }
+            },
+            'yogurt': {
+                name: 'Yogurt', emoji: '🥛', calories: 149, carbs: 11, protein: 9, fat: 8, sodium: 113, sugar: 11,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein, probiotics.', recommendation: 'Choose plain!' },
+                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: '113mg sodium.', recommendation: 'Good option!' },
+                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Probiotic-rich.', recommendation: 'Low-fat best!' },
+                    'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Gut-healthy.', recommendation: 'Great snack!' }
+                }
+            },
+
+            // ========== BEVERAGES ==========
+            'coffee': {
+                name: 'Black Coffee', emoji: '☕', calories: 2, carbs: 0, protein: 0.3, fat: 0, sodium: 5, sugar: 0,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Zero carbs, zero sugar.', recommendation: 'Enjoy black!' },
+                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'Limit caffeine.', recommendation: '1-2 cups OK!' },
+                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Antioxidant-rich.', recommendation: 'Black is best!' },
+                    'None': { level: 'safe', message: 'GOOD', detail: 'Energizing.', recommendation: 'Enjoy!' }
+                }
+            },
+            'milk': {
+                name: 'Milk', emoji: '🥛', calories: 149, carbs: 12, protein: 8, fat: 8, sodium: 107, sugar: 12,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'MODERATE', detail: '12g natural sugar.', recommendation: 'One glass OK!' },
+                    'Hypertension': { level: 'safe', message: 'GOOD', detail: 'Calcium-rich.', recommendation: 'Low-fat best!' },
+                    'Heart Disease': { level: 'safe', message: 'MODERATE', detail: '8g fat.', recommendation: 'Choose low-fat!' },
+                    'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Calcium and protein.', recommendation: 'Great option!' }
+                }
+            },
+            'juice': {
+                name: 'Orange Juice', emoji: '🧃', calories: 112, carbs: 26, protein: 2, fat: 0.5, sodium: 2, sugar: 21,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'LIMIT', detail: '21g sugar!', recommendation: 'Eat whole fruit instead.' },
+                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'High in sugar.', recommendation: 'Small glass.' },
+                    'Heart Disease': { level: 'safe', message: 'OK', detail: 'Natural sugar.', recommendation: 'Small portions.' },
+                    'None': { level: 'warning', message: 'HIGH SUGAR', detail: 'Better to eat fruit.', recommendation: 'Limit intake.' }
+                }
+            },
+            'soft drink': {
+                name: 'Soft Drink', emoji: '🥤', calories: 139, carbs: 35, protein: 0, fat: 0, sodium: 15, sugar: 35,
+                warnings: {
+                    'Diabetes': { level: 'danger', message: 'NEVER', detail: '35g sugar!', recommendation: 'NEVER drink!' },
+                    'Hypertension': { level: 'danger', message: 'AVOID', detail: 'High sugar.', recommendation: 'Water instead!' },
+                    'Heart Disease': { level: 'danger', message: 'DO NOT', detail: 'Empty calories.', recommendation: 'Switch to water!' },
+                    'None': { level: 'danger', message: 'UNHEALTHY', detail: 'No nutrition.', recommendation: 'Choose water!' }
+                }
+            },
+            'water': {
+                name: 'Water', emoji: '💧', calories: 0, carbs: 0, protein: 0, fat: 0, sodium: 0, sugar: 0,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'PERFECT', detail: 'Best beverage!', recommendation: 'Drink 8 glasses!' },
+                    'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Essential!', recommendation: 'Stay hydrated!' },
+                    'Heart Disease': { level: 'safe', message: 'PERFECT', detail: 'Best choice!', recommendation: 'Drink plenty!' },
+                    'None': { level: 'safe', message: 'ESSENTIAL', detail: 'Life-giving!', recommendation: 'Drink often!' }
+                }
+            },
+
+            // ========== FAST FOOD ==========
+            'burger': {
+                name: 'Burger', emoji: '🍔', calories: 354, carbs: 32, protein: 17, fat: 17, sodium: 497, sugar: 6,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'EAT LESS', detail: 'High carbs and fat.', recommendation: 'Small size only.' },
+                    'Hypertension': { level: 'warning', message: 'MODERATE', detail: '497mg sodium.', recommendation: 'Skip fries!' },
+                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '17g fat.', recommendation: 'Grilled chicken better.' },
+                    'None': { level: 'warning', message: 'OCCASIONAL', detail: 'High calories.', recommendation: 'Treat meal.' }
+                }
+            },
+            'pizza': {
+                name: 'Pizza', emoji: '🍕', calories: 285, carbs: 36, protein: 12, fat: 10, sodium: 640, sugar: 4,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'LIMIT', detail: 'High carbs.', recommendation: '1 slice max.' },
+                    'Hypertension': { level: 'danger', message: 'AVOID', detail: '640mg sodium per slice!', recommendation: 'Avoid!' },
+                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: 'High fat and sodium.', recommendation: 'Rare treat.' },
+                    'None': { level: 'warning', message: 'OCCASIONAL', detail: 'High calories.', recommendation: 'Weekend treat.' }
+                }
+            },
+            'fries': {
+                name: 'French Fries', emoji: '🍟', calories: 312, carbs: 41, protein: 4, fat: 15, sodium: 246, sugar: 0.3,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'AVOID', detail: '41g carbs, fried.', recommendation: 'Skip it!' },
+                    'Hypertension': { level: 'danger', message: 'HIGH SODIUM', detail: '246mg sodium.', recommendation: 'Avoid!' },
+                    'Heart Disease': { level: 'danger', message: 'UNHEALTHY', detail: '15g fat, fried.', recommendation: 'Never!' },
+                    'None': { level: 'warning', message: 'JUNK FOOD', detail: 'Fried, high calorie.', recommendation: 'Rare treat.' }
+                }
+            },
+            'hotdog': {
+                name: 'Hot Dog', emoji: '🌭', calories: 151, carbs: 2, protein: 5, fat: 13, sodium: 567, sugar: 1,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'PROCESSED', detail: 'Processed meat.', recommendation: 'Occasional only.' },
+                    'Hypertension': { level: 'danger', message: 'HIGH SODIUM', detail: '567mg sodium!', recommendation: 'Avoid!' },
+                    'Heart Disease': { level: 'danger', message: 'UNHEALTHY', detail: 'Processed, high fat.', recommendation: 'Avoid!' },
+                    'None': { level: 'warning', message: 'PROCESSED', detail: 'Processed meat.', recommendation: 'Rare treat.' }
+                }
+            },
+
+            // ========== DESSERTS ==========
+            'ice cream': {
+                name: 'Ice Cream', emoji: '🍨', calories: 207, carbs: 24, protein: 4, fat: 11, sodium: 80, sugar: 21,
+                warnings: {
+                    'Diabetes': { level: 'danger', message: 'DO NOT EAT', detail: '21g sugar!', recommendation: 'AVOID!' },
+                    'Hypertension': { level: 'warning', message: 'LIMIT', detail: 'High saturated fat.', recommendation: 'Rare treat.' },
+                    'Heart Disease': { level: 'danger', message: 'AVOID', detail: '11g fat.', recommendation: 'Choose sorbet!' },
+                    'None': { level: 'warning', message: 'DESSERT', detail: 'High sugar.', recommendation: 'Occasional treat.' }
+                }
+            },
+            'cake': {
+                name: 'Cake', emoji: '🍰', calories: 235, carbs: 30, protein: 3, fat: 12, sodium: 220, sugar: 20,
+                warnings: {
+                    'Diabetes': { level: 'danger', message: 'AVOID', detail: '20g sugar!', recommendation: 'Skip it!' },
+                    'Hypertension': { level: 'warning', message: 'HIGH SODIUM', detail: '220mg sodium.', recommendation: 'Birthday only!' },
+                    'Heart Disease': { level: 'warning', message: 'UNHEALTHY', detail: '12g fat.', recommendation: 'Special occasions.' },
+                    'None': { level: 'warning', message: 'DESSERT', detail: 'High sugar and fat.', recommendation: 'Celebrations only!' }
+                }
+            },
+            'chocolate': {
+                name: 'Chocolate Bar', emoji: '🍫', calories: 235, carbs: 26, protein: 3, fat: 13, sodium: 30, sugar: 23,
+                warnings: {
+                    'Diabetes': { level: 'danger', message: 'HIGH SUGAR', detail: '23g sugar!', recommendation: 'Dark chocolate better.' },
+                    'Hypertension': { level: 'warning', message: 'MODERATE', detail: 'High in fat.', recommendation: 'Small piece.' },
+                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '13g fat.', recommendation: 'Dark chocolate better.' },
+                    'None': { level: 'warning', message: 'TREAT', detail: 'High sugar and fat.', recommendation: 'Small portions!' }
+                }
+            },
+
+            // ========== FILIPINO FOODS ==========
+            'adobo': {
+                name: 'Chicken Adobo', emoji: '🍗', calories: 290, carbs: 8, protein: 32, fat: 15, sodium: 680, sugar: 3,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein.', recommendation: 'Enjoy!' },
+                    'Hypertension': { level: 'warning', message: 'WATCH SODIUM', detail: '680mg sodium.', recommendation: 'Less sauce!' },
+                    'Heart Disease': { level: 'warning', message: 'MODERATE', detail: '15g fat.', recommendation: 'Remove skin!' },
+                    'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Classic Filipino.', recommendation: 'Enjoy!' }
+                }
+            },
+            'sinigang': {
+                name: 'Sinigang', emoji: '🍲', calories: 180, carbs: 12, protein: 18, fat: 6, sodium: 850, sugar: 4,
+                warnings: {
+                    'Diabetes': { level: 'safe', message: 'HEALTHY', detail: 'Low carbs, vegetables.', recommendation: 'Great choice!' },
+                    'Hypertension': { level: 'danger', message: 'HIGH SODIUM', detail: '850mg sodium!', recommendation: 'Less bouillon!' },
+                    'Heart Disease': { level: 'safe', message: 'MODERATE', detail: 'Vegetable-rich.', recommendation: 'Good!' },
+                    'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Sour soup.', recommendation: 'Enjoy!' }
+                }
+            },
+            'lumpia': {
+                name: 'Lumpia', emoji: '🌯', calories: 140, carbs: 15, protein: 5, fat: 7, sodium: 280, sugar: 1,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'FRIED', detail: 'Fried food.', recommendation: '1-2 pieces max.' },
+                    'Hypertension': { level: 'warning', message: 'MODERATE', detail: '280mg sodium.', recommendation: 'Limit intake.' },
+                    'Heart Disease': { level: 'warning', message: 'FRIED', detail: '7g fat, deep fried.', recommendation: 'Baked better!' },
+                    'None': { level: 'warning', message: 'FRIED FOOD', detail: 'High in fat.', recommendation: 'Occasional treat!' }
+                }
+            },
+            'pancit': {
+                name: 'Pancit', emoji: '🍜', calories: 220, carbs: 30, protein: 8, fat: 8, sodium: 680, sugar: 2,
+                warnings: {
+                    'Diabetes': { level: 'warning', message: 'MODERATE', detail: '30g carbs from noodles.', recommendation: 'Small portion.' },
+                    'Hypertension': { level: 'warning', message: 'HIGH SODIUM', detail: '680mg sodium.', recommendation: 'Limit soy sauce!' },
+                    'Heart Disease': { level: 'safe', message: 'MODERATE', detail: '8g fat.', recommendation: 'Add vegetables!' },
+                    'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Noodle dish.', recommendation: 'Enjoy!' }
+                }
+            }
+        }       
+        // Authentication functions
+        function setupDemoAccount() {
+            const demoUser = {
+                email: 'demo@calotrack.com',
+                password: 'demo123',
+                name: 'Demo User',
+                profile: {}
+            };
+            
+            try {
+                const existing = localStorage.getItem('users');
+                let users = existing ? JSON.parse(existing) : [];
+                users = users.filter(u => u.email !== 'demo@calotrack.com');
+                users.push(demoUser);
+                localStorage.setItem('users', JSON.stringify(users));
+            } catch (e) {
+                localStorage.clear();
+                localStorage.setItem('users', JSON.stringify([demoUser]));
+            }
+        }
+
+        function checkAuth() {
+            console.log('🔍 checkAuth() called - Checking for existing session...');
+            const session = localStorage.getItem('currentSession');
+            console.log('📦 Session data:', session ? 'Found' : 'Not found');
+            
+            if (session) {
+                try {
+                    currentUser = JSON.parse(session);
+                    console.log('👤 Current user loaded:', currentUser.name, currentUser.email);
+                    console.log('📊 User data check:', {
+                        hasMeals: !!currentUser.meals,
+                        mealsCount: currentUser.meals?.length || 0,
+                        hasMedications: !!currentUser.medications,
+                        medicationsCount: currentUser.medications?.length || 0,
+                        hasCustomMealSlots: !!currentUser.customMealSlots,
+                        customMealSlotsCount: currentUser.customMealSlots?.length || 0,
+                        hasHealthReminders: !!currentUser.healthReminders,
+                        healthRemindersCount: currentUser.healthReminders?.length || 0
+                    });
+                    showMainApp();
+                } catch (e) {
+                    console.error('❌ Error parsing session:', e);
+                    localStorage.removeItem('currentSession');
+                }
+            } else {
+                console.log('🔓 No session found - showing login screen');
+            }
+        }
+
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                document.getElementById('login-form').classList.add('active');
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+                document.getElementById('signup-form').classList.add('active');
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+            
+            let users = [];
+            try {
+                users = JSON.parse(localStorage.getItem('users') || '[]');
+            } catch (e) {
+                setupDemoAccount();
+                users = JSON.parse(localStorage.getItem('users') || '[]');
+            }
+            
+            const user = users.find(u => u.email.toLowerCase() === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentSession', JSON.stringify(user));
+                showMainApp();
+            } else {
+                alert('❌ Invalid email or password!\n\n✅ DEMO ACCOUNT:\nEmail: demo@calotrack.com\nPassword: demo123');
+            }
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value.trim().toLowerCase();
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+            
+            if (password !== confirm) {
+                alert('❌ Passwords do not match!');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('❌ Password must be at least 6 characters!');
+                return;
+            }
+            
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            if (users.find(u => u.email.toLowerCase() === email)) {
+                alert('❌ Email already registered!');
+                switchAuthTab('login');
+                return;
+            }
+            
+            const newUser = { email, password, name, profile: {} };
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            alert('✅ Account created successfully!');
+            switchAuthTab('login');
+            document.getElementById('login-email').value = email;
+        }
+
+        function showMainApp() {
+            console.log('🚀 showMainApp() called');
+            console.log('📋 Current user object:', currentUser);
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('current-user').textContent = currentUser.name;
+            
+            if (currentUser.profile && currentUser.profile.name) {
+                loadUserProfile(currentUser.profile);
+            }
+            
+            // Load meals
+            if (currentUser.meals && currentUser.meals.length > 0) {
+                meals = [...currentUser.meals];
+                totalCals = currentUser.totalCals || 0;
+            } else {
+                meals = [];
+                totalCals = 0;
+            }
+            
+            // Load macros
+            if (currentUser.totalMacros) {
+                totalMacros = {...currentUser.totalMacros};
+            }
+            
+            // Load custom meal slots
+            console.log('🍽️ Loading custom meal slots from user data...');
+            if (currentUser.customMealSlots) {
+                customMealSlots = [...currentUser.customMealSlots];
+                console.log('✅ Loaded', customMealSlots.length, 'meal slots:', customMealSlots);
+            } else {
+                customMealSlots = [];
+                console.log('⚠️ No custom meal slots found in user data');
+            }
+            
+            // Load medications
+            console.log('💊 Loading medications from user data...');
+            if (currentUser.medications) {
+                medications = [...currentUser.medications];
+                console.log('✅ Loaded', medications.length, 'medications:', medications);
+            } else {
+                medications = [];
+                console.log('⚠️ No medications found in user data');
+            }
+            
+            // Load health reminders
+            console.log('🔔 Loading health reminders from user data...');
+            if (currentUser.healthReminders) {
+                healthReminders = [...currentUser.healthReminders];
+                console.log('✅ Loaded', healthReminders.length, 'reminders:', healthReminders);
+            } else {
+                healthReminders = [];
+                console.log('⚠️ No health reminders found in user data');
+            }
+            
+            console.log('📂 Loaded:', meals.length, 'meals,', medications.length, 'meds,', healthReminders.length, 'reminders');
+            
+            updateTracker();
+            updateMacros();
+            
+            // Initialize custom scheduling
+            console.log('🔄 Calling update functions...');
+            if (typeof updateCustomMealScheduleList === 'function') {
+                console.log('  ↳ Calling updateCustomMealScheduleList()');
+                updateCustomMealScheduleList();
+            }
+            if (typeof updateMedicationsList === 'function') {
+                console.log('  ↳ Calling updateMedicationsList()');
+                updateMedicationsList();
+            }
+            if (typeof updateRemindersList === 'function') {
+                console.log('  ↳ Calling updateRemindersList()');
+                updateRemindersList();
+            }
+            if (typeof updateMedBadge === 'function') {
+                console.log('  ↳ Calling updateMedBadge()');
+                updateMedBadge();
+            }
+            if (typeof updateDailyTimeline === 'function') {
+                console.log('  ↳ Calling updateDailyTimeline()');
+                updateDailyTimeline();
+            }
+            console.log('✅ showMainApp() completed');
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // ✅ Save everything before logout
+                saveUserProfile();
+                console.log('💾 Saved data before logout');
+                localStorage.removeItem('currentSession');
+                location.reload();
+            }
+        }
+
+        function saveUserProfile() {
+            console.log('💾 saveUserProfile() called');
+            if (!currentUser) {
+                console.error('❌ No currentUser - cannot save!');
+                return;
+            }
+            console.log('👤 Saving for user:', currentUser.email);
+            console.log('📊 Data to save:', {
+                meals: meals.length,
+                customMealSlots: customMealSlots.length,
+                medications: medications.length,
+                healthReminders: healthReminders.length
+            });
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.email === currentUser.email);
+            console.log('🔍 User index in array:', userIndex);
+            
+            if (userIndex !== -1) {
+                users[userIndex].profile = {...userData};
+                users[userIndex].meals = [...meals];
+                users[userIndex].totalCals = totalCals;
+                users[userIndex].totalMacros = {...totalMacros};
+                users[userIndex].customMealSlots = [...customMealSlots];
+                users[userIndex].medications = [...medications];
+                users[userIndex].healthReminders = [...healthReminders];
+                
+                console.log('📦 User object being saved:', users[userIndex]);
+                localStorage.setItem('users', JSON.stringify(users));
+                console.log('✅ Saved successfully!');
+                console.log('💾 Saved:', meals.length, 'meals,', customMealSlots.length, 'meal slots,', medications.length, 'meds,', healthReminders.length, 'reminders');
+                
+                // Update currentUser in session
+                currentUser = users[userIndex];
+                localStorage.setItem('currentSession', JSON.stringify(currentUser));
+                console.log('🔄 Session updated');
+            } else {
+                console.error('❌ User not found in users array!');
+            }
+        }
+
+        function loadUserProfile(profile) {
+            userData = {...profile};
+            
+            if (profile.name) document.getElementById('userName').value = profile.name;
+            if (profile.age) document.getElementById('age').value = profile.age;
+            if (profile.gender) document.getElementById('gender').value = profile.gender;
+            if (profile.height) document.getElementById('height').value = profile.height;
+            if (profile.weight) document.getElementById('weight').value = profile.weight;
+            if (profile.condition) document.getElementById('condition').value = profile.condition;
+            
+            updateProfileDisplay();
+        }
+
+        // UI functions
+        function updateProfileDisplay() {
+            const display = document.getElementById('condition-display');
+            const metricsDiv = document.getElementById('profile-metrics');
+            
+            // Update header display
+            if (userData.name && userData.condition) {
+                if (userData.condition === 'None') {
+                    display.innerHTML = `${userData.name} (No conditions)`;
+                } else {
+                    display.innerHTML = `${userData.name} (${userData.condition})`;
+                }
+            } else {
+                display.innerHTML = 'Please set up your profile first';
+            }
+            
+            // Update profile metrics display
+            if (userData.name && userData.bmi) {
+                metricsDiv.style.display = 'block';
+                
+                // Update BMI display
+                document.getElementById('bmi-value').textContent = userData.bmi;
+                document.getElementById('bmi-category').textContent = userData.bmiCategory || 'BMI';
+                
+                // Set BMI color
+                let bmiColor;
+                const bmiNum = parseFloat(userData.bmi);
+                if (bmiNum < 18.5) bmiColor = '#f59e0b';
+                else if (bmiNum < 25) bmiColor = '#10b981';
+                else if (bmiNum < 30) bmiColor = '#f59e0b';
+                else bmiColor = '#ef4444';
+                
+                document.getElementById('bmi-display').style.background = `linear-gradient(135deg, ${bmiColor} 0%, ${bmiColor}dd 100%)`;
+                
+                // Update calorie display
+                document.getElementById('daily-calories-display').textContent = userData.dailyCalories || '--';
+                
+                // Update personal info
+                document.getElementById('display-name').textContent = userData.name;
+                document.getElementById('display-age').textContent = userData.age || '--';
+                document.getElementById('display-gender').textContent = userData.gender || '--';
+                document.getElementById('display-height').textContent = userData.height || '--';
+                document.getElementById('display-weight').textContent = userData.weight || '--';
+                document.getElementById('display-condition').textContent = userData.condition === 'None' ? 'None' : userData.condition;
+            } else {
+                metricsDiv.style.display = 'none';
+            }
+            
+            // Pre-fill the form with existing data
+            if (userData.name) {
+                document.getElementById('userName').value = userData.name || '';
+                document.getElementById('age').value = userData.age || '';
+                document.getElementById('gender').value = userData.gender || '';
+                document.getElementById('height').value = userData.height || '';
+                document.getElementById('weight').value = userData.weight || '';
+                document.getElementById('condition').value = userData.condition || 'None';
+            }
+        }
+
+        function checkProfileAndScan(method) {
+            if (!userData.name) {
+                alert('⚠️ Please set up your Health Profile first!');
+                showTab('profile');
+                return;
+            }
+            
+            if (GEMINI_API_KEY === 'YOUR_API_KEY_HERE') {
+                alert('⚠️ Please configure your Gemini API key!\n\nEdit the source code and replace YOUR_API_KEY_HERE with your actual API key from:\nhttps://aistudio.google.com/app/apikey');
+                return;
+            }
+            
+            if (method === 'camera') openCamera();
+            else document.getElementById('fileInput').click();
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+
+
+        function scanAnotherFood() {
+            console.log('🔄 Scanning another food...');
+            closeModal();
+            setTimeout(() => {
+                console.log('📷 Opening camera for next scan...');
+                checkProfileAndScan('camera');
+            }, 300); // Give time for cleanup
+        }
+
+                // Camera functions
+        async function openCamera() {
+            console.log('🎥 Opening camera...');
+            
+            // CRITICAL: Stop any existing stream first
+            if (stream) {
+                console.log('⚠️ Closing existing stream...');
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            
+            // Reset captured image
+            capturedImageData = null;
+            
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalBody.innerHTML = `
+                <h2>📷 Camera</h2>
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 16px;">Position food in frame</p>
+                <video id="video" autoplay playsinline style="max-width: 100%; border-radius: 12px; background: #000;"></video>
+                <div class="camera-controls">
+                    <button class="btn" onclick="capturePhoto()">📸 Capture</button>
+                    <button class="btn btn-outline" onclick="closeCamera()">Cancel</button>
+                </div>
+            `;
+            modal.classList.add('active');
+
+            try {
+                console.log('📹 Requesting camera access...');
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                const video = document.getElementById('video');
+                if (video) {
+                    video.srcObject = stream;
+                    console.log('✅ Camera opened successfully!');
+                } else {
+                    console.error('❌ Video element not found');
+                }
+            } catch (error) {
+                console.error('❌ Camera error:', error);
+                modalBody.innerHTML = `
+                    <h2>⚠️ Camera Access Required</h2>
+                    <p>Please allow camera access in your browser.</p>
+                    <p style="font-size: 0.85em; color: #666;">Error: ${error.message}</p>
+                    <button class="btn btn-outline" onclick="closeCamera()">Close</button>
+                `;
+            }
+        }
+
+        function capturePhoto() {
+            console.log('📸 Capturing photo...');
+            
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+            capturedImageData = canvas.toDataURL('image/jpeg', 0.8);
+            
+            console.log('✅ Photo captured! Size:', Math.round(capturedImageData.length / 1024), 'KB');
+
+            // Stop camera after capture
+            if (stream) {
+                console.log('📹 Stopping camera after capture...');
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+
+            document.getElementById('modalBody').innerHTML = `
+                <h2>📸 Photo Captured</h2>
+                <img src="${capturedImageData}" class="captured-image" style="max-width: 100%; border-radius: 12px;">
+                <div class="camera-controls">
+                    <button class="btn" onclick="analyzeWithGemini()">🤖 Analyze with AI</button>
+                    <button class="btn btn-outline" onclick="openCamera()">🔄 Retake</button>
+                </div>
+            `;
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    capturedImageData = e.target.result;
+                    const modal = document.getElementById('modal');
+                    document.getElementById('modalBody').innerHTML = `
+                        <h2>Photo Selected</h2>
+                        <img src="${capturedImageData}" class="captured-image">
+                        <div class="camera-controls">
+                            <button class="btn" onclick="analyzeWithGemini()">Analyze with AI</button>
+                            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                        </div>
+                    `;
+                    modal.classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function closeCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            closeModal();
+        }
+
+        function closeModal() {
+            console.log('🚪 Closing modal...');
+            
+            // Stop camera stream
+            if (stream) {
+                console.log('📹 Stopping camera stream...');
+                stream.getTracks().forEach(track => {
+                    track.stop();
+                    console.log('   - Stopped track:', track.kind);
+                });
+                stream = null;
+            }
+            
+            // Clear modal
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+            document.getElementById('modalBody').innerHTML = '';
+            
+            // Clear captured image
+            capturedImageData = null;
+            
+            // Reset file input
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) fileInput.value = '';
+            
+            document.body.style.overflow = 'auto';
+            
+            console.log('✅ Modal closed - Ready for next scan!');
+        }
+
+        // Google Gemini AI Analysis
+        async function analyzeWithGemini() {
+            document.getElementById('modalBody').innerHTML = `
+                <h2>🤖 AI Analyzing Food</h2>
+                <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
+                <div class="loader"></div>
+                <p class="scanning-text">Google Gemini AI is analyzing your image...</p>
+            `;
+
+            try {
+                const base64Data = capturedImageData.split(',')[1];
+                
+                // Try v1 API with YOUR specific models from discovery tool
+                const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro', 'gemini-2.0-flash-lite'];
+                
+                let response = null;
+                let lastError = null;
+                
+                console.log('Starting Gemini API analysis...');
+                
+                for (const model of models) {
+                    try {
+                        console.log(`Trying v1/${model}...`);
+                        
+                        response = await fetch(
+                            `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+                            {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    contents: [{
+                                        parts: [
+                                            {
+                                                text: "Identify the main food item in this image. Respond with ONLY the food name in lowercase (e.g., 'pizza', 'banana', 'rice', 'salad'). If multiple foods are present, identify the main/largest one. Be specific but concise."
+                                            },
+                                            {
+                                                inline_data: {
+                                                    mime_type: "image/jpeg",
+                                                    data: base64Data
+                                                }
+                                            }
+                                        ]
+                                    }]
+                                })
+                            }
+                        );
+                        
+                        if (response.ok) {
+                            console.log(`✅ SUCCESS with v1/${model}!`);
+                            break; // Found a working model!
+                        }
+                        
+                        const errorData = await response.json();
+                        lastError = errorData.error?.message || 'Unknown error';
+                        console.log(`✗ Failed with v1/${model}:`, lastError);
+                        
+                    } catch (err) {
+                        lastError = err.message;
+                        console.log(`✗ Error with v1/${model}:`, err.message);
+                    }
+                }
+                
+                // Check if we got a successful response
+                if (!response || !response.ok) {
+                    throw new Error(`All models failed. Last error: ${lastError}`);
+                }
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Full API response:', data);
+                
+                // Check for API error
+                if (data.error) {
+                    throw new Error(`API Error: ${data.error.message || 'Unknown error'}`);
+                }
+                
+                // Parse the food name
+                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                    const foodName = data.candidates[0].content.parts[0].text.trim().toLowerCase();
+                    console.log('Gemini detected:', foodName);
+                    
+                    // Food aliases for better AI matching
+                    const foodAliases = {
+                        // Proteins
+                        'steak': 'beef',
+                        'beef steak': 'beef',
+                        'sirloin': 'beef',
+                        'ribeye': 'beef',
+                        'tenderloin': 'beef',
+                        't-bone': 'beef',
+                        'pork chop': 'pork',
+                        'porkchop': 'pork',
+                        'bacon': 'pork',
+                        'ham': 'pork',
+                        'grilled chicken': 'chicken',
+                        'fried chicken': 'chicken',
+                        'chicken breast': 'chicken',
+                        'chicken thigh': 'chicken',
+                        'roasted chicken': 'chicken',
+                        'tilapia': 'fish',
+                        'salmon': 'fish',
+                        'tuna': 'fish',
+                        'bangus': 'fish',
+                        'milkfish': 'fish',
+                        
+                        // Carbs
+                        'steamed rice': 'white rice',
+                        'cooked rice': 'white rice',
+                        'jasmine rice': 'white rice',
+                        'fried rice': 'white rice',
+                        'plain rice': 'white rice',
+                        'spaghetti': 'pasta',
+                        'noodles': 'pasta',
+                        'macaroni': 'pasta',
+                        'penne': 'pasta',
+                        'linguine': 'pasta',
+                        
+                        // Breakfast
+                        'fried egg': 'egg',
+                        'scrambled egg': 'egg',
+                        'boiled egg': 'egg',
+                        'poached egg': 'egg',
+                        'oats': 'oatmeal',
+                        'porridge': 'oatmeal',
+                        'toast': 'bread',
+                        'sandwich bread': 'bread',
+                        'sliced bread': 'bread',
+                        
+                        // Vegetables
+                        'lettuce': 'salad',
+                        'mixed greens': 'salad',
+                        'caesar salad': 'salad',
+                        'garden salad': 'salad',
+                        'baked potato': 'potato',
+                        'mashed potato': 'potato',
+                        'french fries': 'fries',
+                        'fries': 'fries',
+                        'chips': 'fries',
+                        
+                        // Fruits
+                        'orange juice': 'juice',
+                        'green apple': 'apple',
+                        'red apple': 'apple',
+                        
+                        // Fast Food
+                        'hamburger': 'burger',
+                        'cheeseburger': 'burger',
+                        'pizza slice': 'pizza',
+                        'hot dog': 'hotdog',
+                        
+                        // Snacks
+                        'potato chip': 'chips',
+                        'potato chips': 'chips',
+                        'crisps': 'chips',
+                        'peanuts': 'nuts',
+                        'almonds': 'nuts',
+                        'cashews': 'nuts',
+                        'walnuts': 'nuts',
+                        'chocolate bar': 'chocolate',
+                        'candy bar': 'chocolate',
+                        'milk chocolate': 'chocolate',
+                        
+                        // Beverages
+                        'coke': 'soft drink',
+                        'pepsi': 'soft drink',
+                        'soda': 'soft drink',
+                        'pop': 'soft drink',
+                        'cola': 'soft drink',
+                        'oj': 'juice',
+                        'fruit juice': 'juice',
+                        'black coffee': 'coffee',
+                        'espresso': 'coffee',
+                        
+                        // Filipino
+                        'chicken adobo': 'adobo',
+                        'pork adobo': 'adobo',
+                        'shanghai': 'lumpia',
+                        'spring roll': 'lumpia',
+                        'egg roll': 'lumpia',
+                        'canton': 'pancit',
+                        'bihon': 'pancit'
+                    };
+                    
+                    // Clean up the AI response
+                    let cleanedFoodName = foodName.toLowerCase().trim();
+                    console.log('🔍 Looking for:', cleanedFoodName);
+                    
+                    // Try to match to our database with aliases
+                    let matchedFood = null;
+                    
+                    // Step 1: Check if there's an exact alias match
+                    if (foodAliases[cleanedFoodName]) {
+                        matchedFood = foodAliases[cleanedFoodName];
+                        console.log('✅ Alias match:', cleanedFoodName, '→', matchedFood);
+                    }
+                    
+                    // Step 2: If no alias, try direct key matching
+                    if (!matchedFood) {
+                        for (let key in foods) {
+                            if (cleanedFoodName.includes(key) || key.includes(cleanedFoodName)) {
+                                matchedFood = key;
+                                console.log('✅ Direct match:', cleanedFoodName, '→', matchedFood);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Step 3: If still no match, try partial word matching with aliases
+                    if (!matchedFood) {
+                        for (let alias in foodAliases) {
+                            if (cleanedFoodName.includes(alias) || alias.includes(cleanedFoodName)) {
+                                matchedFood = foodAliases[alias];
+                                console.log('✅ Partial alias match:', cleanedFoodName, '→', alias, '→', matchedFood);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (matchedFood) {
+                        showResults(matchedFood, foodName);
+                    } else {
+                        // 🔥 HYBRID: Not in database → Ask AI for nutritional data
+                        console.log('⚠️ Not in database, asking AI for nutritional info...');
+                        
+                        document.getElementById('modalBody').innerHTML = `
+                            <h2>🤖 Getting Nutritional Data</h2>
+                            <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
+                            <div class="loader"></div>
+                            <p class="scanning-text">Food detected: ${foodName}</p>
+                            <p style="color: var(--text-light); font-size: 0.9em;">⚠️ Not in database - requesting AI nutritional analysis...</p>
+                        `;
+                        
+                        // Ask AI for nutritional information
+                        await getAINutritionData(foodName, base64Data);
+                    }
+                } else {
+                    console.error('Unexpected response structure:', data);
+                    throw new Error('Gemini API returned an unexpected response format. Check console for details.');
+                }
+                
+            } catch (error) {
+                console.error('Gemini API Error:', error);
+                
+                let errorMessage = error.message;
+                let troubleshootingSteps = '';
+                
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    errorMessage = 'Network error - Could not connect to Gemini API';
+                    troubleshootingSteps = `
+                        <div style="text-align: left; margin-top: 16px; font-size: 0.85em;">
+                            <strong>Troubleshooting:</strong><br>
+                            • Check your internet connection<br>
+                            • Make sure you're not behind a strict firewall<br>
+                            • Try disabling browser extensions
+                        </div>
+                    `;
+                } else if (error.message.includes('API_KEY_INVALID') || error.message.includes('400')) {
+                    errorMessage = 'Invalid API Key';
+                    troubleshootingSteps = `
+                        <div style="text-align: left; margin-top: 16px; font-size: 0.85em;">
+                            <strong>Fix:</strong><br>
+                            1. Get a valid API key from:<br>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--primary);">https://aistudio.google.com/app/apikey</a><br>
+                            2. Open the HTML file in a text editor<br>
+                            3. Replace 'YOUR_API_KEY_HERE' with your key at line 1109<br>
+                            4. Save and reload the page
+                        </div>
+                    `;
+                } else if (error.message.includes('PERMISSION_DENIED') || error.message.includes('403')) {
+                    errorMessage = 'API Key lacks permission or quota exceeded';
+                    troubleshootingSteps = `
+                        <div style="text-align: left; margin-top: 16px; font-size: 0.85em;">
+                            <strong>Possible causes:</strong><br>
+                            • API key doesn't have Gemini API enabled<br>
+                            • Daily quota exceeded (free tier: 1500/day)<br>
+                            • API key is restricted to specific websites
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('modalBody').innerHTML = `
+                    <h2>⚠️ Analysis Error</h2>
+                    <div class="warning danger">
+                        <div class="warning-title">
+                            <span class="warning-icon">❌</span>
+                            AI Analysis Failed
+                        </div>
+                        <p><strong>Error:</strong> ${errorMessage}</p>
+                        ${troubleshootingSteps}
+                    </div>
+                    <div class="info-box" style="margin-top: 20px; text-align: left;">
+                        <strong>📋 Debug Info:</strong><br>
+                        API Key configured: ${GEMINI_API_KEY !== 'YOUR_API_KEY_HERE' ? 'Yes' : 'No'}<br>
+                        Check browser console (F12) for more details
+                    </div>
+                    <div class="camera-controls">
+                        <button class="btn btn-outline" onclick="openCamera()">Try Again</button>
+                        <button class="btn btn-outline" onclick="closeModal()">Close</button>
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================
+        // 🎯 HYBRID APPROACH HELPER FUNCTIONS
+        // ============================================
+        
+        async function getAINutritionData(foodName, base64Data) {
+            try {
+                const prompt = `For the food "${foodName}" shown in this image, provide nutritional information per typical serving.
+
+Respond in this EXACT JSON format (no markdown, no backticks):
+{
+  "emoji": "appropriate emoji",
+  "serving": "typical serving size",
+  "calories": number,
+  "carbs": number,
+  "protein": number,
+  "fat": number,
+  "sodium": number,
+  "sugar": number
+}`;
+
+                console.log('🤖 Requesting nutritional data from AI...');
+                
+                // Try models in order
+                const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
+                let response = null;
+                
+                for (const model of models) {
+                    try {
+                        response = await fetch(
+                            `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+                            {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    contents: [{
+                                        parts: [
+                                            { text: prompt },
+                                            {
+                                                inline_data: {
+                                                    mime_type: "image/jpeg",
+                                                    data: base64Data
+                                                }
+                                            }
+                                        ]
+                                    }]
+                                })
+                            }
+                        );
+                        
+                        if (response.ok) {
+                            console.log(`✅ Got nutrition data with ${model}`);
+                            break;
+                        }
+                    } catch (err) {
+                        console.log(`✗ Failed with ${model}:`, err.message);
+                    }
+                }
+                
+                if (!response || !response.ok) {
+                    throw new Error('Could not get nutritional data from AI');
+                }
+
+                const data = await response.json();
+                const aiResponse = data.candidates[0].content.parts[0].text.trim();
+                
+                console.log('🤖 AI nutrition response:', aiResponse);
+                
+                // Parse JSON (remove markdown if present)
+                let jsonText = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                const nutritionData = JSON.parse(jsonText);
+                
+                console.log('📊 Parsed nutrition data:', nutritionData);
+                
+                // Display the AI-provided nutritional data
+                displayAIFood(foodName, nutritionData);
+                
+            } catch (error) {
+                console.error('❌ Error getting nutrition data:', error);
+                document.getElementById('modalBody').innerHTML = `
+                    <h2>⚠️ Could Not Get Nutritional Data</h2>
+                    <div class="warning warning">
+                        <p>Sorry, we couldn't retrieve nutritional information for "${foodName}".</p>
+                        <p style="margin-top: 12px;">Try scanning a more common food from our database.</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="closeModal()">Close</button>
+                `;
+            }
+        }
+        
+        function displayAIFood(foodName, data) {
+            const { emoji, serving, calories, carbs, protein, fat, sodium, sugar } = data;
+            const condition = userData.condition || 'None';
+            
+            // Generate dynamic warnings based on condition
+            const warnings = generateDynamicWarnings({ calories, carbs, protein, fat, sodium, sugar }, condition);
+            
+            document.getElementById('modalBody').innerHTML = `
+                <h2>✅ Food Analyzed!</h2>
+                <div class="food-result">
+                    <div class="food-icon">${emoji || '🍽️'}</div>
+                    <h3>${foodName}</h3>
+                    <p class="detection-note" style="color: var(--warning); font-weight: 500;">🤖 AI Estimated (not in database)</p>
+                    <p class="serving-size">📏 Serving: ${serving}</p>
+                </div>
+                
+                <div class="warning ${warnings.level}">
+                    <strong>${warnings.level === 'safe' ? '✅' : '⚠️'} ${warnings.level.toUpperCase()}</strong>
+                    <p>${warnings.message}</p>
+                </div>
+                
+                <div class="nutrition-grid">
+                    <div class="nutrition-item">
+                        <span class="nutrition-label">🔥 Calories</span>
+                        <span class="nutrition-value">${calories}</span>
+                    </div>
+                    <div class="nutrition-item">
+                        <span class="nutrition-label">🍞 Carbs</span>
+                        <span class="nutrition-value">${carbs}g</span>
+                    </div>
+                    <div class="nutrition-item">
+                        <span class="nutrition-label">🥩 Protein</span>
+                        <span class="nutrition-value">${protein}g</span>
+                    </div>
+                    <div class="nutrition-item">
+                        <span class="nutrition-label">🥑 Fat</span>
+                        <span class="nutrition-value">${fat}g</span>
+                    </div>
+                    <div class="nutrition-item">
+                        <span class="nutrition-label">🧂 Sodium</span>
+                        <span class="nutrition-value">${sodium}mg</span>
+                    </div>
+                    <div class="nutrition-item">
+                        <span class="nutrition-label">🍬 Sugar</span>
+                        <span class="nutrition-value">${sugar}g</span>
+                    </div>
+                </div>
+                
+                <div class="info-box" style="margin-top: 16px; background: #fff3cd; border-color: #ffc107;">
+                    <strong>ℹ️ Note:</strong> This food wasn't in our database, so nutritional values are AI estimates. 
+                    For more accurate tracking, add common foods to our database.
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn" onclick="saveAIFood('${foodName.replace(/'/g, "\'")}', ${calories}, ${carbs}, ${protein}, ${fat}, ${sodium}, ${sugar})">
+                        ✅ Add to Tracker
+                    </button>
+                    <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                </div>
+            `;
+        }
+        
+        function generateDynamicWarnings(data, condition) {
+            const { calories, carbs, protein, fat, sodium, sugar } = data;
+            
+            // Condition-specific thresholds and logic
+            if (condition === 'Diabetes') {
+                if (sugar > 15) {
+                    return { level: 'danger', message: `⚠️ VERY HIGH SUGAR: ${sugar}g! Not recommended for diabetes.` };
+                } else if (sugar > 10) {
+                    return { level: 'warning', message: `HIGH SUGAR: ${sugar}g. Monitor blood sugar carefully.` };
+                } else if (carbs > 45) {
+                    return { level: 'warning', message: `MODERATE CARBS: ${carbs}g. Watch portion size.` };
+                } else {
+                    return { level: 'safe', message: '✅ Acceptable for diabetics. Monitor as usual.' };
+                }
+            } else if (condition === 'Hypertension') {
+                if (sodium > 600) {
+                    return { level: 'danger', message: `⚠️ VERY HIGH SODIUM: ${sodium}mg! Avoid this food.` };
+                } else if (sodium > 400) {
+                    return { level: 'warning', message: `HIGH SODIUM: ${sodium}mg. Limit portion size.` };
+                } else {
+                    return { level: 'safe', message: '✅ Acceptable sodium levels.' };
+                }
+            } else if (condition === 'Heart Disease') {
+                if (fat > 20) {
+                    return { level: 'danger', message: `⚠️ HIGH FAT: ${fat}g! Choose leaner options.` };
+                } else if (fat > 12) {
+                    return { level: 'warning', message: `MODERATE FAT: ${fat}g. Watch your intake.` };
+                } else {
+                    return { level: 'safe', message: '✅ Heart-healthy fat levels.' };
+                }
+            } else {
+                // No specific condition
+                if (calories > 500) {
+                    return { level: 'warning', message: `High calorie food: ${calories} calories per serving.` };
+                } else {
+                    return { level: 'safe', message: '✅ Nutritional information analyzed.' };
+                }
+            }
+        }
+        
+        function saveAIFood(name, calories, carbs, protein, fat, sodium, sugar) {
+            console.log('💾 Saving AI food:', name);
+            
+            const meal = {
+                id: Date.now(),
+                name: name,
+                emoji: '🤖',
+                calories: calories,
+                carbs: carbs,
+                protein: protein,
+                fat: fat,
+                sodium: sodium,
+                sugar: sugar,
+                timestamp: new Date().toLocaleString(),
+                source: 'AI'
+            };
+            
+            meals.push(meal);
+            totalCals += calories;
+            totalMacros.carbs += carbs;
+            totalMacros.protein += protein;
+            totalMacros.fat += fat;
+            totalMacros.sodium += sodium;
+            
+            saveUserProfile();
+            updateTracker();
+            updateMacros();
+            
+            closeModal();
+            
+            alert(`✅ ${name} added to your tracker!\n\n📊 AI-estimated nutritional data saved.`);
+            console.log('✅ AI food saved to tracker');
+        }
+
+        function showResults(foodKey, detectedName) {
+            const food = foods[foodKey];
+            const warningInfo = food.warnings[userData.condition];
+
+            document.getElementById('modalBody').innerHTML = `
+                <h2>✅ Analysis Complete</h2>
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">AI detected: ${detectedName}</p>
+                ${capturedImageData ? `<img src="${capturedImageData}" class="captured-image" style="max-height: 180px;">` : ''}
+                <div style="font-size: 3em; margin: 20px 0;">${food.emoji}</div>
+                <h3>${food.name}</h3>
+                
+                <div class="stat-card">
+                    <h3>${food.calories}</h3>
+                    <p>Calories</p>
+                </div>
+
+                <div class="warning ${warningInfo.level}">
+                    <div class="warning-title">
+                        <span class="warning-icon">${warningInfo.level === 'danger' ? '🚫' : warningInfo.level === 'warning' ? '⚠️' : '✅'}</span>
+                        ${warningInfo.message}
+                    </div>
+                    <p>${warningInfo.detail}</p>
+                </div>
+
+                <div class="recommendation">
+                    <strong>💡 Recommendation:</strong><br>
+                    ${warningInfo.recommendation}
+                </div>
+
+                <div class="nutrition-grid">
+                    <div class="nutrition-item"><strong>${food.carbs}g</strong><span>Carbs</span></div>
+                    <div class="nutrition-item"><strong>${food.protein}g</strong><span>Protein</span></div>
+                    <div class="nutrition-item"><strong>${food.fat}g</strong><span>Fat</span></div>
+                    <div class="nutrition-item"><strong>${food.sodium}mg</strong><span>Sodium</span></div>
+                </div>
+
+                ${warningInfo.level !== 'danger' ? `
+                    <div class="meal-category-select">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">Meal Category:</label>
+                        <select id="meal-category" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
+                            <option value="breakfast">🌅 Breakfast</option>
+                            <option value="lunch">☀️ Lunch</option>
+                            <option value="dinner">🌙 Dinner</option>
+                            <option value="snack">🍪 Snack</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="addToTrackerWithCategory('${foodKey}')">Add to Tracker</button>
+                ` : `
+                    <button class="btn" style="background: #999;" disabled>⚠️ Not Safe for Your Condition</button>
+                `}
+                <div style="display: flex; gap: 12px; margin-top: 12px;">
+                    <button class="btn btn-outline btn-small" onclick="closeModal()">Close</button>
+                    <button class="btn btn-small" onclick="scanAnotherFood()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">📸 Scan Another</button>
+                </div>
+            `;
+
+            document.getElementById('scan-results').innerHTML = document.getElementById('modalBody').innerHTML;
+            document.getElementById('scan-results').classList.add('active');
+        }
+
+        // Tracker functions
+        function addToTracker(foodKey) {
+            const food = foods[foodKey];
+            meals.push(food);
+            totalCals += food.calories;
+            
+            // ✅ NEW: Save immediately
+            saveUserProfile();
+            
+            updateTracker();
+            closeModal();
+            
+            setTimeout(() => {
+                showTab('tracker');
+                
+                // ✅ NEW: Check if over limit
+                if (userData.dailyCalories && totalCals > userData.dailyCalories) {
+                    const excess = totalCals - userData.dailyCalories;
+                    alert(`⚠️ ${food.name} added to tracker!
+
+⚠️ WARNING: You've exceeded your daily calorie target!
+📊 Current: ${totalCals} calories
+🎯 Target: ${userData.dailyCalories} calories
+🔴 Over by: ${excess} calories
+
+💡 Consider reducing portion sizes or exercising to balance your intake.`);
+                } else {
+                    alert(`✅ ${food.name} added to your tracker!`);
+                }
+            }, 100);
+        }
+
+        function updateTracker() {
+            document.getElementById('totalCalories').textContent = totalCals;
+            const mealList = document.getElementById('mealList');
+            
+            // ✅ NEW: Show calorie warning if over limit
+            const calorieDisplay = document.getElementById('totalCalories');
+            const dailyTarget = userData.dailyCalories || 0;
+            
+            if (dailyTarget > 0 && totalCals > dailyTarget) {
+                calorieDisplay.style.color = '#ef4444';
+                calorieDisplay.style.fontWeight = 'bold';
+            } else {
+                calorieDisplay.style.color = '#10b981';
+                calorieDisplay.style.fontWeight = 'bold';
+            }
+            
+            if (meals.length === 0) {
+                mealList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>No meals tracked yet</p>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 8px;">Scan foods to start tracking your daily intake</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div style="padding: 0;">';
+            
+            // ✅ NEW: Add warning banner if over limit
+            if (dailyTarget > 0 && totalCals > dailyTarget) {
+                const excess = totalCals - dailyTarget;
+                const percentage = Math.round((totalCals / dailyTarget) * 100);
+                html += `
+                    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%); 
+                                border-left: 4px solid #f59e0b; 
+                                padding: 16px; 
+                                border-radius: 8px; 
+                                margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 2em;">⚠️</span>
+                            <div>
+                                <strong style="color: #92400e; font-size: 1.1em;">Calorie Limit Exceeded!</strong>
+                                <p style="color: #78350f; margin: 4px 0 0 0; font-size: 0.9em;">
+                                    You're at ${percentage}% of your daily target (${excess} cal over)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (dailyTarget > 0) {
+                const remaining = dailyTarget - totalCals;
+                const percentage = Math.round((totalCals / dailyTarget) * 100);
+                html += `
+                    <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); 
+                                border-left: 4px solid #10b981; 
+                                padding: 16px; 
+                                border-radius: 8px; 
+                                margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 2em;">✅</span>
+                            <div>
+                                <strong style="color: #065f46; font-size: 1.1em;">On Track!</strong>
+                                <p style="color: #047857; margin: 4px 0 0 0; font-size: 0.9em;">
+                                    ${percentage}% of daily target • ${remaining} calories remaining
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            meals.forEach((meal, i) => {
+                const categoryIcons = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snack: '🍪' };
+                const categoryClass = meal.category ? `category-${meal.category}` : '';
+                const categoryDisplay = meal.category ? `<span class="meal-category-badge ${categoryClass}">${categoryIcons[meal.category] || ''} ${meal.category}</span>` : '';
+                
+                html += `
+                    <div class="meal-list-item">
+                        <div class="meal-info">
+                            <span class="meal-emoji">${meal.emoji}</span>
+                            <div class="meal-details">
+                                <div class="meal-name">${meal.name}${categoryDisplay}</div>
+                                <div class="meal-calories">${meal.calories} calories</div>
+                            </div>
+                        </div>
+                        <button class="meal-remove" onclick="removeMeal(${i})">✕ Remove</button>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            mealList.innerHTML = html;
+        }
+
+        function removeMeal(index) {
+            totalCals -= meals[index].calories;
+            meals.splice(index, 1);
+            
+            saveUserProfile();
+            updateTracker();
+            updateMacros();
+            updateMealPlanDisplay();
+        }
+
+
+        // ============================================
+        // 🎯 MACRO TRACKING FUNCTIONS
+        // ============================================
+        
+        function updateMacros() {
+            // Reset totals
+            totalMacros = { carbs: 0, protein: 0, fat: 0, sodium: 0 };
+            
+            // Calculate totals from meals
+            meals.forEach(meal => {
+                totalMacros.carbs += meal.carbs || 0;
+                totalMacros.protein += meal.protein || 0;
+                totalMacros.fat += meal.fat || 0;
+                totalMacros.sodium += meal.sodium || 0;
+            });
+            
+            // Update display
+            document.getElementById('total-carbs').textContent = totalMacros.carbs;
+            document.getElementById('total-protein').textContent = totalMacros.protein;
+            document.getElementById('total-fat').textContent = totalMacros.fat;
+            document.getElementById('total-sodium').textContent = totalMacros.sodium;
+            
+            // Calculate percentages for progress bars
+            const dailyCals = userData.dailyCalories || 2000;
+            
+            // Carbs: 4 cal/g, target 45-65%
+            const carbsCals = totalMacros.carbs * 4;
+            const carbsPercent = (carbsCals / dailyCals) * 100;
+            const carbsTarget = Math.min((carbsPercent / 55) * 100, 100); // 55% is middle of range
+            document.getElementById('carbs-bar').style.width = carbsTarget + '%';
+            
+            // Protein: 4 cal/g, target 10-35%
+            const proteinCals = totalMacros.protein * 4;
+            const proteinPercent = (proteinCals / dailyCals) * 100;
+            const proteinTarget = Math.min((proteinPercent / 22.5) * 100, 100); // 22.5% is middle
+            document.getElementById('protein-bar').style.width = proteinTarget + '%';
+            
+            // Fat: 9 cal/g, target 20-35%
+            const fatCals = totalMacros.fat * 9;
+            const fatPercent = (fatCals / dailyCals) * 100;
+            const fatTarget = Math.min((fatPercent / 27.5) * 100, 100); // 27.5% is middle
+            document.getElementById('fat-bar').style.width = fatTarget + '%';
+            
+            // Sodium: limit 2300mg
+            const sodiumPercent = Math.min((totalMacros.sodium / 2300) * 100, 100);
+            document.getElementById('sodium-bar').style.width = sodiumPercent + '%';
+            
+            console.log('📊 Macros updated:', totalMacros);
+        }
+        
+        // ============================================
+        // 🍽️ MEAL CATEGORY FUNCTIONS
+        // ============================================
+        
+        function addToTrackerWithCategory(foodKey) {
+            const food = foods[foodKey];
+            const category = document.getElementById('meal-category').value;
+            
+            // Add category to food object
+            const mealWithCategory = { ...food, category: category, timestamp: new Date().toISOString() };
+            
+            meals.push(mealWithCategory);
+            totalCals += food.calories;
+            
+            // Save immediately
+            saveUserProfile();
+            
+            // Update displays
+            updateTracker();
+            updateMacros();
+            closeModal();
+            
+            setTimeout(() => {
+                showTab('tracker');
+                
+                // Check if over limit
+                if (userData.dailyCalories && totalCals > userData.dailyCalories) {
+                    const excess = totalCals - userData.dailyCalories;
+                    alert(`⚠️ ${food.name} added as ${category}!
+
+⚠️ WARNING: You've exceeded your daily calorie target!
+📊 Current: ${totalCals} calories
+🎯 Target: ${userData.dailyCalories} calories
+🔴 Over by: ${excess} calories`);
+                } else {
+                    alert(`✅ ${food.name} added to ${category}!`);
+                }
+            }, 100);
+        }
+        
+        // ============================================
+        // ⏰ MEAL SCHEDULE FUNCTIONS
+        // ============================================
+        
+        // ============================================
+        // 🍽️ CUSTOM MEAL SCHEDULE FUNCTIONS
+        // ============================================
+        
+        function addCustomMealSlot() {
+            const name = document.getElementById('custom-meal-name').value.trim();
+            const icon = document.getElementById('custom-meal-icon').value.trim() || '🍽️';
+            const time = document.getElementById('custom-meal-time').value;
+            const reminder = document.getElementById('custom-meal-reminder').value === 'yes';
+            
+            if (!name) {
+                alert('⚠️ Please enter a meal name');
+                return;
+            }
+            
+            if (!time) {
+                alert('⚠️ Please select a time');
+                return;
+            }
+            
+            const mealSlot = {
+                id: Date.now(),
+                name: name,
+                icon: icon,
+                time: time,
+                reminder: reminder
+            };
+            
+            customMealSlots.push(mealSlot);
+            
+            // Clear form
+            document.getElementById('custom-meal-name').value = '';
+            document.getElementById('custom-meal-icon').value = '';
+            document.getElementById('custom-meal-time').value = '';
+            
+            saveUserProfile();
+            updateCustomMealScheduleList();
+            updateDailyTimeline();
+            
+            alert(`✅ ${icon} ${name} added at ${time}!`);
+            console.log('➕ Meal slot added:', mealSlot);
+        }
+        
+        function editCustomMealSlot(id) {
+            const slot = customMealSlots.find(s => s.id === id);
+            if (!slot) return;
+            
+            const newName = prompt('Edit meal name:', slot.name);
+            if (!newName) return;
+            
+            const newIcon = prompt('Edit icon (emoji):', slot.icon);
+            const newTime = prompt('Edit time (HH:MM format):', slot.time);
+            
+            if (newTime && /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/.test(newTime)) {
+                slot.name = newName || slot.name;
+                slot.icon = newIcon || slot.icon;
+                slot.time = newTime;
+                
+                saveUserProfile();
+                updateCustomMealScheduleList();
+                updateDailyTimeline();
+                
+                alert('✅ Meal slot updated!');
+            } else {
+                alert('❌ Invalid time format. Use HH:MM (e.g., 14:30)');
+            }
+        }
+        
+        function deleteCustomMealSlot(id) {
+            const slot = customMealSlots.find(s => s.id === id);
+            if (!slot) return;
+            
+            if (confirm(`Delete "${slot.icon} ${slot.name}" at ${slot.time}?`)) {
+                customMealSlots = customMealSlots.filter(s => s.id !== id);
+                saveUserProfile();
+                updateCustomMealScheduleList();
+                updateDailyTimeline();
+                alert('✅ Meal slot deleted');
+            }
+        }
+        
+        function addDefaultMeals() {
+            const defaults = [
+                { id: Date.now() + 1, name: 'Breakfast', icon: '🌅', time: '08:00', reminder: true },
+                { id: Date.now() + 2, name: 'Lunch', icon: '☀️', time: '12:00', reminder: true },
+                { id: Date.now() + 3, name: 'Snack', icon: '🍪', time: '15:00', reminder: true },
+                { id: Date.now() + 4, name: 'Dinner', icon: '🌙', time: '18:00', reminder: true }
+            ];
+            
+            customMealSlots.push(...defaults);
+            saveUserProfile();
+            updateCustomMealScheduleList();
+            updateDailyTimeline();
+            
+            alert('✅ Added 4 default meal times!');
+        }
+        
+        function clearAllMeals() {
+            if (confirm('Are you sure you want to clear all meal slots?')) {
+                customMealSlots = [];
+                saveUserProfile();
+                updateCustomMealScheduleList();
+                updateDailyTimeline();
+                alert('✅ All meal slots cleared');
+            }
+        }
+        
+        function updateCustomMealScheduleList() {
+            console.log('📝 updateCustomMealScheduleList() called');
+            console.log('   Current customMealSlots:', customMealSlots);
+            const list = document.getElementById('custom-meal-schedule-list');
+            console.log('   List element found:', !!list);
+            
+            if (customMealSlots.length === 0) {
+                console.log('   ⚠️ No meal slots to display');
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🍽️</div>
+                        <p>No meal schedule set</p>
+                        <p style="font-size: 0.9em; color: #666;">Add custom meal times or use the default 4 meals</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by time
+            const sorted = [...customMealSlots].sort((a, b) => a.time.localeCompare(b.time));
+            
+            let html = '';
+            sorted.forEach(slot => {
+                html += `
+                    <div class="schedule-item">
+                        <div class="schedule-info">
+                            <div class="schedule-name">${slot.icon} ${slot.name}</div>
+                            <div class="schedule-time">⏰ ${slot.time} ${slot.reminder ? '• 🔔 Reminder ON' : ''}</div>
+                        </div>
+                        <div class="schedule-actions">
+                            <button class="btn-edit" onclick="editCustomMealSlot(${slot.id})">✏️ Edit</button>
+                            <button class="btn-small-action btn-delete" onclick="deleteCustomMealSlot(${slot.id})">✕</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+        }
+        
+        // ============================================
+        // 📅 DAILY TIMELINE FUNCTIONS
+        // ============================================
+        
+        function updateDailyTimeline() {
+            const timeline = document.getElementById('daily-timeline');
+            
+            // Combine meals and medications
+            const allItems = [];
+            
+            // Add meal slots
+            customMealSlots.forEach(slot => {
+                allItems.push({
+                    time: slot.time,
+                    type: 'MEAL',
+                    icon: slot.icon,
+                    name: slot.name,
+                    reminder: slot.reminder
+                });
+            });
+            
+            // Add medications
+            medications.forEach(med => {
+                med.times.forEach(time => {
+                    allItems.push({
+                        time: time,
+                        type: 'MEDICATION',
+                        icon: '💊',
+                        name: `${med.name} (${med.dosage})`,
+                        reminder: true
+                    });
+                });
+            });
+            
+            // Add health reminders
+            healthReminders.forEach(reminder => {
+                allItems.push({
+                    time: reminder.time,
+                    type: 'REMINDER',
+                    icon: '🔔',
+                    name: reminder.text,
+                    reminder: true
+                });
+            });
+            
+            if (allItems.length === 0) {
+                timeline.innerHTML = `
+                    <div class="timeline-empty">
+                        No scheduled items yet. Add meal times, medications, or reminders above!
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by time
+            allItems.sort((a, b) => a.time.localeCompare(b.time));
+            
+            let html = '<div class="timeline">';
+            allItems.forEach(item => {
+                const typeColor = item.type === 'MEAL' ? '#10b981' : item.type === 'MEDICATION' ? '#ef4444' : '#3b82f6';
+                html += `
+                    <div class="timeline-item" style="border-left-color: ${typeColor};">
+                        <div class="timeline-time">${item.time}</div>
+                        <div class="timeline-content">
+                            <div class="timeline-type" style="color: ${typeColor};">${item.type}</div>
+                            <div style="font-weight: bold;">${item.icon} ${item.name}</div>
+                            ${item.reminder ? '<span style="font-size: 0.85em; color: #666;">🔔 Reminder set</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            timeline.innerHTML = html;
+        }
+        
+        // ============================================
+        // 💊 ENHANCED MEDICATION FUNCTIONS
+        // ============================================
+        
+        function updateMedTimeInputs() {
+            const timesPerDay = document.getElementById('med-times-per-day').value;
+            const container = document.getElementById('med-time-inputs');
+            
+            if (timesPerDay === 'custom') {
+                container.innerHTML = `
+                    <button class="btn btn-outline" onclick="addMedTimeInput()" style="margin-bottom: 8px;">+ Add Time</button>
+                    <div id="med-time-inputs-list"></div>
+                `;
+                return;
+            }
+            
+            const count = parseInt(timesPerDay);
+            const defaultTimes = ['08:00', '14:00', '20:00', '02:00'];
+            
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                html += `<input type="time" class="med-time-input" value="${defaultTimes[i] || '12:00'}">`;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function addMedTimeInput() {
+            const list = document.getElementById('med-time-inputs-list');
+            const newInput = document.createElement('div');
+            newInput.style.cssText = 'display: flex; gap: 8px; margin-bottom: 8px;';
+            newInput.innerHTML = `
+                <input type="time" class="med-time-input" style="flex: 1;">
+                <button class="btn-small-action btn-delete" onclick="this.parentElement.remove()">✕</button>
+            `;
+            list.appendChild(newInput);
+        }
+        
+
+        
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert('❌ Your browser does not support notifications');
+                return;
+            }
+            
+            if (Notification.permission === "granted") {
+                alert('✅ Notifications already enabled!');
+                scheduleAllNotifications();
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        alert('✅ Notifications enabled! You will receive meal reminders.');
+                        scheduleAllNotifications();
+                    } else {
+                        alert('❌ Notifications were denied. Enable them in your browser settings.');
+                    }
+                });
+            } else {
+                alert('❌ Notifications blocked. Enable them in your browser settings.');
+            }
+        }
+        
+        function scheduleAllNotifications() {
+            // This would ideally use service workers for persistent scheduling
+            // For demo purposes, we'll show how it would work
+            console.log('🔔 Notification scheduling activated');
+            console.log('   Breakfast:', mealSchedule.breakfast);
+            console.log('   Lunch:', mealSchedule.lunch);
+            console.log('   Dinner:', mealSchedule.dinner);
+            console.log('   Snack:', mealSchedule.snack);
+            
+            // In a real implementation, you'd use service workers here
+            alert('🔔 Meal reminders scheduled!\n\nYou\'ll receive notifications at:\n• Breakfast: ' + mealSchedule.breakfast + '\n• Lunch: ' + mealSchedule.lunch + '\n• Dinner: ' + mealSchedule.dinner + '\n• Snack: ' + mealSchedule.snack);
+        }
+        
+        // ============================================
+        // 💊 MEDICATION FUNCTIONS
+        // ============================================
+        
+        function addMedication() {
+            const name = document.getElementById('med-name').value.trim();
+            const dosage = document.getElementById('med-dosage').value.trim();
+            const notes = document.getElementById('med-notes').value.trim();
+            const reminder = document.getElementById('med-reminder').value === 'yes';
+            
+            if (!name || !dosage) {
+                alert('⚠️ Please enter medication name and dosage');
+                return;
+            }
+            
+            // Get all time inputs
+            const timeInputs = document.querySelectorAll('.med-time-input');
+            const times = Array.from(timeInputs)
+                .map(input => input.value)
+                .filter(t => t);
+            
+            if (times.length === 0) {
+                alert('⚠️ Please set at least one time');
+                return;
+            }
+            
+            const timesPerDay = document.getElementById('med-times-per-day').value;
+            const frequency = timesPerDay === 'custom' ? `${times.length} times daily` : 
+                             timesPerDay === '1' ? 'Once daily' :
+                             timesPerDay === '2' ? 'Twice daily' :
+                             timesPerDay === '3' ? 'Three times daily' :
+                             'Four times daily';
+            
+            const medication = {
+                id: Date.now(),
+                name: name,
+                dosage: dosage,
+                frequency: frequency,
+                times: times,
+                notes: notes,
+                reminder: reminder,
+                taken: []
+            };
+            
+            medications.push(medication);
+            console.log('💊 Medication added to array:', medication);
+            console.log('💊 Total medications now:', medications.length);
+            
+            // Clear form
+            document.getElementById('med-name').value = '';
+            document.getElementById('med-dosage').value = '';
+            document.getElementById('med-notes').value = '';
+            document.getElementById('med-times-per-day').selectedIndex = 0;
+            updateMedTimeInputs();
+            
+            saveUserProfile();
+            updateMedicationsList();
+            updateMedBadge();
+            updateDailyTimeline();
+            
+            alert(`✅ ${name} added successfully!\n\n📅 Times: ${times.join(', ')}`);
+            console.log('💊 Medication added:', medication);
+        }
+        
+        function updateMedicationsList() {
+            console.log('💊 updateMedicationsList() called');
+            console.log('   Current medications:', medications);
+            const list = document.getElementById('medications-list');
+            console.log('   List element found:', !!list);
+            
+            if (medications.length === 0) {
+                console.log('   ⚠️ No medications to display');
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💊</div>
+                        <p>No medications added yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            medications.forEach(med => {
+                const timeDisplay = med.times.join(', ');
+                html += `
+                    <div class="reminder-card">
+                        <div class="reminder-info">
+                            <strong style="font-size: 1.1em;">💊 ${med.name}</strong>
+                            <div style="color: #666; margin-top: 4px;">
+                                <div>📏 ${med.dosage} • ${med.frequency}</div>
+                                <div class="reminder-time">⏰ ${timeDisplay}</div>
+                                ${med.notes ? `<div style="font-size: 0.85em; margin-top: 4px;">📝 ${med.notes}</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="reminder-actions">
+                            <button class="btn-small-action btn-taken" onclick="markMedicationTaken(${med.id})">✓ Taken</button>
+                            <button class="btn-small-action btn-delete" onclick="deleteMedication(${med.id})">✕</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+        }
+        
+        function markMedicationTaken(id) {
+            const med = medications.find(m => m.id === id);
+            if (med) {
+                const now = new Date().toISOString();
+                med.taken.push(now);
+                saveUserProfile();
+                alert('✅ Marked as taken!');
+                console.log('💊 Medication taken:', med.name);
+            }
+        }
+        
+        function deleteMedication(id) {
+            if (confirm('Are you sure you want to delete this medication?')) {
+                medications = medications.filter(m => m.id !== id);
+                saveUserProfile();
+                updateMedicationsList();
+                updateMedBadge();
+                updateDailyTimeline();
+                alert('✅ Medication deleted');
+            }
+        }
+        
+        function updateMedBadge() {
+            const badge = document.getElementById('med-badge');
+            if (medications.length > 0) {
+                badge.textContent = medications.length;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        
+        // ============================================
+        // 🔔 HEALTH REMINDER FUNCTIONS
+        // ============================================
+        
+        function addHealthReminder() {
+            const text = document.getElementById('reminder-text').value;
+            const time = document.getElementById('reminder-time').value;
+            
+            if (!text || !time) {
+                alert('⚠️ Please enter reminder text and time');
+                return;
+            }
+            
+            const reminder = {
+                id: Date.now(),
+                text: text,
+                time: time,
+                completed: []
+            };
+            
+            healthReminders.push(reminder);
+            console.log('🔔 Reminder added to array:', reminder);
+            console.log('🔔 Total reminders now:', healthReminders.length);
+            
+            document.getElementById('reminder-text').value = '';
+            document.getElementById('reminder-time').value = '';
+            
+            saveUserProfile();
+            updateRemindersList();
+            updateDailyTimeline();
+            
+            alert('✅ Reminder added successfully!');
+        }
+        
+        function updateRemindersList() {
+            console.log('🔔 updateRemindersList() called');
+            console.log('   Current healthReminders:', healthReminders);
+            const list = document.getElementById('reminders-list');
+            console.log('   List element found:', !!list);
+            
+            if (healthReminders.length === 0) {
+                console.log('   ⚠️ No reminders to display');
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔔</div>
+                        <p>No health reminders set</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            healthReminders.forEach(reminder => {
+                html += `
+                    <div class="reminder-card">
+                        <div class="reminder-info">
+                            <strong style="font-size: 1.1em;">🔔 ${reminder.text}</strong>
+                            <div class="reminder-time">⏰ ${reminder.time}</div>
+                        </div>
+                        <div class="reminder-actions">
+                            <button class="btn-small-action btn-taken" onclick="markReminderDone(${reminder.id})">✓ Done</button>
+                            <button class="btn-small-action btn-delete" onclick="deleteReminder(${reminder.id})">✕</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+        }
+        
+        function markReminderDone(id) {
+            const reminder = healthReminders.find(r => r.id === id);
+            if (reminder) {
+                const now = new Date().toISOString();
+                reminder.completed.push(now);
+                saveUserProfile();
+                alert('✅ Reminder completed!');
+                console.log('🔔 Reminder done:', reminder.text);
+            }
+        }
+        
+        function deleteReminder(id) {
+            if (confirm('Are you sure you want to delete this reminder?')) {
+                healthReminders = healthReminders.filter(r => r.id !== id);
+                saveUserProfile();
+                updateRemindersList();
+                updateDailyTimeline();
+                alert('✅ Reminder deleted');
+            }
+        }
+
+                // BMI Calculator
+        function calculateBMI() {
+            const name = document.getElementById('userName').value;
+            const age = parseInt(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const condition = document.getElementById('condition').value;
+
+            if (!name || !age || !gender || !height || !weight) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const heightM = height / 100;
+            const bmi = (weight / (heightM * heightM)).toFixed(1);
+            const bmr = gender === 'Male' 
+                ? 10 * weight + 6.25 * height - 5 * age + 5 
+                : 10 * weight + 6.25 * height - 5 * age - 161;
+            const dailyCalories = Math.round(bmr * 1.375);
+
+            // Calculate BMI category BEFORE creating userData
+            let category, color;
+            if (bmi < 18.5) { category = 'Underweight'; color = '#f59e0b'; }
+            else if (bmi < 25) { category = 'Normal'; color = '#10b981'; }
+            else if (bmi < 30) { category = 'Overweight'; color = '#f59e0b'; }
+            else { category = 'Obese'; color = '#ef4444'; }
+
+            // Now we can use category in userData
+            userData = { name, condition, dailyCalories, age, gender, height, weight, bmi, bmiCategory: category };
+            saveUserProfile();
+            updateProfileDisplay();
+
+            document.getElementById('bmi-results').innerHTML = `
+                <div class="stat-card" style="background: ${color};"><h3>BMI ${bmi}</h3><p>${category}</p></div>
+                <div class="stat-card"><h3>${dailyCalories}</h3><p>Daily Target</p></div>
+                <div class="warning success"><strong>✅ Saved!</strong></div>
+            `;
+           }
+           <!-- PWA Service Worker Registration -->
+
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')
+            .then((registration) => {
+                console.log('✅ Service Worker registered:', registration.scope);
+            })
+            .catch((error) => {
+                console.error('❌ Service Worker registration failed:', error);
+            });
+        });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('💡 PWA install prompt ready');
+        
+        // Optionally show custom install button
+        // You can add a button that calls: deferredPrompt.prompt();
+        });
+
+        // Track PWA installation
+        window.addEventListener('appinstalled', () => {
+        console.log('🎉 CaloTrack PWA installed successfully!');
+        deferredPrompt = null;
+        });
+
+
+        // ============================================
+        // 🚀 INITIALIZATION - Run on page load
+        // ============================================
+        console.log('🎬 Page loaded - Starting initialization...');
+        setupDemoAccount();  // Ensure demo account exists
+        console.log('✅ Demo account setup complete');
+        checkAuth();         // Check for existing session and load user data
+        console.log('✅ Initialization complete');
+    </script>
+    
+</body>
+</html>

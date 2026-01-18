@@ -2057,6 +2057,19 @@
             }
         }
 
+        function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+    
+    if (tab === 'login') {
+        document.querySelectorAll('.auth-tab')[0].classList.add('active');
+        document.getElementById('login-form').classList.add('active');
+    } else {
+        document.querySelectorAll('.auth-tab')[1].classList.add('active');
+        document.getElementById('signup-form').classList.add('active');
+    }
+}
+
         function checkAuth() {
             console.log('🔍 checkAuth() called - Checking for existing session...');
             const session = localStorage.getItem('currentSession');
@@ -2085,19 +2098,6 @@
                 console.log('🔓 No session found - showing login screen');
             }
         }
-
-        function switchAuthTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    
-    if (tab === 'login') {
-        document.querySelectorAll('.auth-tab')[0].classList.add('active');
-        document.getElementById('login-form').classList.add('active');
-    } else {
-        document.querySelectorAll('.auth-tab')[1].classList.add('active');
-        document.getElementById('signup-form').classList.add('active');
-    }
-}
 
         function handleLogin(event) {
             event.preventDefault();
@@ -3990,5 +3990,6 @@ Respond in this EXACT JSON format (no markdown, no backticks):
     </script>
 </body>
 </html>
+
 
 

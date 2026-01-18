@@ -1573,7 +1573,7 @@
         // 2. Sign in with Google
         // 3. Click "Create API key"
         // 4. Copy and paste it below
-        const GEMINI_API_KEY = 'AIzaSyAwayYSrL0CM4zZqHRyc4o2oe3bxIr4xco';
+        const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'YOUR_API_KEY_HERE';
         // ============================================
 
         // Global state
@@ -3969,4 +3969,5 @@ Respond in this EXACT JSON format (no markdown, no backticks):
 </body>
 
 </html>
+
 

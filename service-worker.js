@@ -1,6 +1,6 @@
 
 const CACHE_NAME = 'calotrack-v1.1';
-const BASE_PATH = '/calotrack';  // Your repo name
+const BASE_PATH = '/CaloTrack';  // Your repo name
 
 const urlsToCache = [
   `${BASE_PATH}/`,

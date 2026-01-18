@@ -2349,20 +2349,16 @@
         }
 
         function checkProfileAndScan(method) {
-            if (!userData.name) {
-                alert('⚠️ Please set up your Health Profile first!');
-                showTab('profile');
-                return;
-            }
-            
-            if (GEMINI_API_KEY === 'YOUR_API_KEY_HERE') {
-                alert('⚠️ Please configure your Gemini API key!\n\nEdit the source code and replace YOUR_API_KEY_HERE with your actual API key from:\nhttps://aistudio.google.com/app/apikey');
-                return;
-            }
-            
-            if (method === 'camera') openCamera();
-            else document.getElementById('fileInput').click();
-        }
+    if (!userData.name) {
+        alert('⚠️ Please set up your Health Profile first!');
+        showTab('profile');
+        return;
+    }
+    
+    // API key check removed - now using secure Netlify Function
+    if (method === 'camera') openCamera();
+    else document.getElementById('fileInput').click();
+}
 
         function showTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -3889,6 +3885,7 @@ Respond in this EXACT JSON format (no markdown, no backticks):
 </body>
 
 </html>
+
 
 
 

@@ -1181,8 +1181,8 @@
 
             <div class="login-body">
                 <div class="auth-tabs">
-                    <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
-                    <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+                    <button class="auth-tab active" data-tab="login">Sign In</button>
+                    <button class="auth-tab" data-tab="signup">Sign Up</button>
                 </div>
 
                 <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
@@ -4016,6 +4016,7 @@ Respond in this EXACT JSON format (no markdown, no backticks):
     </script>
 </body>
 </html>
+
 
 
 

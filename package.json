@@ -1,0 +1,8 @@
+{
+  "name": "calotrack",
+  "version": "1.0.0",
+  "description": "AI-Powered Food Scanner",
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+}

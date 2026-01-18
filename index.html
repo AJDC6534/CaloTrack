@@ -2531,52 +2531,40 @@
 
         // Google Gemini AI Analysis
         async function analyzeWithGemini() {
-            document.getElementById('modalBody').innerHTML = `
-        <h2>🤖 AI Analyzing Food</h2>
+    document.getElementById('modalBody').innerHTML = `
+        <h2>🤖 AI Analyzing Food with Multiple Models</h2>
         <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
         <div class="loader"></div>
-        <p class="scanning-text">Google Gemini AI is analyzing your image...</p>
+        <p class="scanning-text">Testing multiple Gemini models for best accuracy...</p>
     `;
 
     try {
-        // ✅ ADD THESE DEBUG LOGS
-        console.log('🖼️ capturedImageData length:', capturedImageData?.length);
-        console.log('🖼️ capturedImageData starts with:', capturedImageData?.substring(0, 50));
-        
         const base64Data = capturedImageData.split(',')[1];
         
-        // ✅ ADD THIS CHECK
         if (!base64Data) {
             throw new Error('Failed to extract base64 data from image');
         }
         
-        console.log('📦 base64Data length:', base64Data.length);
-        console.log('📦 base64Data starts with:', base64Data.substring(0, 30));
+        console.log('🔄 Calling Netlify Function with multiple models...');
         
-        const requestBody = {
-            image: base64Data,
-            prompt: "Identify the main food item in this image. Respond with ONLY the food name in lowercase (e.g., 'pizza', 'banana', 'rice', 'salad'). If multiple foods are present, identify the main/largest one. Be specific but concise.",
-            model: 'gemini-2.0-flash'
-        };
-        
-        // ✅ LOG THE REQUEST
-        console.log('📤 Sending request:', {
-            imageLength: requestBody.image.length,
-            promptLength: requestBody.prompt.length,
-            model: requestBody.model
-        });
-        
-        console.log('🔄 Calling Netlify Function...');
-        
+        // ✅ NEW: Request multiple models
         const response = await fetch('/.netlify/functions/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({
+                image: base64Data,
+                prompt: "Identify the main food item in this image. Respond with ONLY the food name in lowercase (e.g., 'pizza', 'banana', 'rice', 'salad'). If multiple foods are present, identify the main/largest one. Be specific but concise.",
+                // ✅ Send array of models to test
+                models: [
+                    'gemini-2.0-flash-exp',
+                    'gemini-1.5-pro',
+                    'gemini-1.5-flash'
+                ]
+            })
         });
 
         console.log('📡 Response status:', response.status);
 
-        // ✅ LOG THE ERROR RESPONSE
         if (!response.ok) {
             const errorData = await response.json();
             console.error('❌ Error response:', errorData);
@@ -2585,206 +2573,13 @@
 
         const data = await response.json();
         console.log('✅ Full API response:', data);
-    document.getElementById('modalBody').innerHTML = `
-        <h2>🤖 AI Analyzing Food</h2>
-        <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
-        <div class="loader"></div>
-        <p class="scanning-text">Google Gemini AI is analyzing your image...</p>
-    `;
-
-    try {
-        const base64Data = capturedImageData.split(',')[1];
         
-        console.log('🔄 Calling Netlify Function...');
-        
-        // Call YOUR Netlify Function instead of Gemini directly
-        const response = await fetch('/.netlify/functions/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                image: base64Data,
-                prompt: "Identify the main food item in this image. Respond with ONLY the food name in lowercase (e.g., 'pizza', 'banana', 'rice', 'salad'). If multiple foods are present, identify the main/largest one. Be specific but concise.",
-                model: 'gemini-2.0-flash'
-            })
-        });
-
-        console.log('📡 Response status:', response.status);
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `API request failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Full API response:', data);
-        
-        // Check for API error
-        if (data.error) {
-            throw new Error(`API Error: ${data.error.message || 'Unknown error'}`);
-        }
-        
-        // Parse the food name
-        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-            const foodName = data.candidates[0].content.parts[0].text.trim().toLowerCase();
-            console.log('Gemini detected:', foodName);
-            
-            // Food aliases for better AI matching
-            const foodAliases = {
-                // Proteins
-                'steak': 'beef',
-                'beef steak': 'beef',
-                'sirloin': 'beef',
-                'ribeye': 'beef',
-                'tenderloin': 'beef',
-                't-bone': 'beef',
-                'pork chop': 'pork',
-                'porkchop': 'pork',
-                'bacon': 'pork',
-                'ham': 'pork',
-                'grilled chicken': 'chicken',
-                'fried chicken': 'chicken',
-                'chicken breast': 'chicken',
-                'chicken thigh': 'chicken',
-                'roasted chicken': 'chicken',
-                'tilapia': 'fish',
-                'salmon': 'fish',
-                'tuna': 'fish',
-                'bangus': 'fish',
-                'milkfish': 'fish',
-                
-                // Carbs
-                'steamed rice': 'white rice',
-                'cooked rice': 'white rice',
-                'jasmine rice': 'white rice',
-                'fried rice': 'white rice',
-                'plain rice': 'white rice',
-                'spaghetti': 'pasta',
-                'noodles': 'pasta',
-                'macaroni': 'pasta',
-                'penne': 'pasta',
-                'linguine': 'pasta',
-                
-                // Breakfast
-                'fried egg': 'egg',
-                'scrambled egg': 'egg',
-                'boiled egg': 'egg',
-                'poached egg': 'egg',
-                'oats': 'oatmeal',
-                'porridge': 'oatmeal',
-                'toast': 'bread',
-                'sandwich bread': 'bread',
-                'sliced bread': 'bread',
-                
-                // Vegetables
-                'lettuce': 'salad',
-                'mixed greens': 'salad',
-                'caesar salad': 'salad',
-                'garden salad': 'salad',
-                'baked potato': 'potato',
-                'mashed potato': 'potato',
-                'french fries': 'fries',
-                'fries': 'fries',
-                'chips': 'fries',
-                
-                // Fruits
-                'orange juice': 'juice',
-                'green apple': 'apple',
-                'red apple': 'apple',
-                
-                // Fast Food
-                'hamburger': 'burger',
-                'cheeseburger': 'burger',
-                'pizza slice': 'pizza',
-                'hot dog': 'hotdog',
-                
-                // Snacks
-                'potato chip': 'chips',
-                'potato chips': 'chips',
-                'crisps': 'chips',
-                'peanuts': 'nuts',
-                'almonds': 'nuts',
-                'cashews': 'nuts',
-                'walnuts': 'nuts',
-                'chocolate bar': 'chocolate',
-                'candy bar': 'chocolate',
-                'milk chocolate': 'chocolate',
-                
-                // Beverages
-                'coke': 'soft drink',
-                'pepsi': 'soft drink',
-                'soda': 'soft drink',
-                'pop': 'soft drink',
-                'cola': 'soft drink',
-                'oj': 'juice',
-                'fruit juice': 'juice',
-                'black coffee': 'coffee',
-                'espresso': 'coffee',
-                
-                // Filipino
-                'chicken adobo': 'adobo',
-                'pork adobo': 'adobo',
-                'shanghai': 'lumpia',
-                'spring roll': 'lumpia',
-                'egg roll': 'lumpia',
-                'canton': 'pancit',
-                'bihon': 'pancit'
-            };
-            
-            // Clean up the AI response
-            let cleanedFoodName = foodName.toLowerCase().trim();
-            console.log('🔍 Looking for:', cleanedFoodName);
-            
-            // Try to match to our database with aliases
-            let matchedFood = null;
-            
-            // Step 1: Check if there's an exact alias match
-            if (foodAliases[cleanedFoodName]) {
-                matchedFood = foodAliases[cleanedFoodName];
-                console.log('✅ Alias match:', cleanedFoodName, '→', matchedFood);
-            }
-            
-            // Step 2: If no alias, try direct key matching
-            if (!matchedFood) {
-                for (let key in foods) {
-                    if (cleanedFoodName.includes(key) || key.includes(cleanedFoodName)) {
-                        matchedFood = key;
-                        console.log('✅ Direct match:', cleanedFoodName, '→', matchedFood);
-                        break;
-                    }
-                }
-            }
-            
-            // Step 3: If still no match, try partial word matching with aliases
-            if (!matchedFood) {
-                for (let alias in foodAliases) {
-                    if (cleanedFoodName.includes(alias) || alias.includes(cleanedFoodName)) {
-                        matchedFood = foodAliases[alias];
-                        console.log('✅ Partial alias match:', cleanedFoodName, '→', alias, '→', matchedFood);
-                        break;
-                    }
-                }
-            }
-            
-            if (matchedFood) {
-                showResults(matchedFood, foodName);
-            } else {
-                // Not in database → Ask AI for nutritional data
-                console.log('⚠️ Not in database, asking AI for nutritional info...');
-                
-                document.getElementById('modalBody').innerHTML = `
-                    <h2>🤖 Getting Nutritional Data</h2>
-                    <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
-                    <div class="loader"></div>
-                    <p class="scanning-text">Food detected: ${foodName}</p>
-                    <p style="color: var(--text-light); font-size: 0.9em;">⚠️ Not in database - requesting AI nutritional analysis...</p>
-                `;
-                
-                // Ask AI for nutritional information
-                await getAINutritionData(foodName, base64Data);
-            }
+        // ✅ NEW: Handle multiple model results
+        if (data.success && data.results && data.results.length > 0) {
+            // Display results from all models
+            displayMultiModelResults(data.results, base64Data);
         } else {
-            console.error('Unexpected response structure:', data);
-            throw new Error('Gemini API returned an unexpected response format.');
+            throw new Error('No results from any model');
         }
         
     } catch (error) {
@@ -2826,15 +2621,231 @@
                 <p><strong>Error:</strong> ${errorMessage}</p>
                 ${troubleshootingSteps}
             </div>
-            <div class="info-box" style="margin-top: 20px; text-align: left;">
-                <strong>📋 Debug Info:</strong><br>
-                Check browser console (F12) and Netlify Function logs for details
-            </div>
             <div class="camera-controls">
                 <button class="btn btn-outline" onclick="openCamera()">Try Again</button>
                 <button class="btn btn-outline" onclick="closeModal()">Close</button>
             </div>
         `;
+    }
+}
+
+// ✅ NEW: Function to display results from multiple models
+function displayMultiModelResults(results, base64Data) {
+    console.log('📊 Displaying results from', results.length, 'models');
+    
+    // Extract food names from each model
+    const detections = results.map(result => {
+        const foodName = result.response.candidates[0].content.parts[0].text.trim().toLowerCase();
+        return {
+            model: result.model,
+            foodName: foodName
+        };
+    });
+    
+    console.log('🔍 Detections:', detections);
+    
+    // Find most common detection (consensus)
+    const foodCounts = {};
+    detections.forEach(d => {
+        foodCounts[d.foodName] = (foodCounts[d.foodName] || 0) + 1;
+    });
+    
+    const sortedFoods = Object.entries(foodCounts).sort((a, b) => b[1] - a[1]);
+    const consensusFood = sortedFoods[0][0];
+    const consensusCount = sortedFoods[0][1];
+    
+    console.log('🎯 Consensus:', consensusFood, `(${consensusCount}/${results.length} models agree)`);
+    
+    // Show results with model breakdown
+    let modelBreakdown = '';
+    detections.forEach(d => {
+        const icon = d.foodName === consensusFood ? '✅' : '❓';
+        modelBreakdown += `
+            <div style="padding: 8px; background: ${d.foodName === consensusFood ? '#d1fae5' : '#fef3c7'}; border-radius: 6px; margin: 4px 0;">
+                ${icon} <strong>${d.model}:</strong> ${d.foodName}
+            </div>
+        `;
+    });
+    
+    // Display interim results
+    document.getElementById('modalBody').innerHTML = `
+        <h2>🤖 Multi-Model Analysis</h2>
+        <img src="${capturedImageData}" class="captured-image" style="opacity: 0.5;">
+        <div style="margin: 20px 0; padding: 16px; background: #f0f9ff; border-radius: 12px; border: 2px solid #3b82f6;">
+            <h3 style="margin: 0 0 12px 0; color: #1e40af;">📊 Model Results:</h3>
+            ${modelBreakdown}
+            <div style="margin-top: 16px; padding: 12px; background: white; border-radius: 8px; border: 2px solid #10b981;">
+                <strong style="color: #065f46;">🎯 Consensus Detection:</strong> ${consensusFood}
+                <div style="font-size: 0.9em; color: #047857; margin-top: 4px;">
+                    ${consensusCount}/${results.length} models agree
+                </div>
+            </div>
+        </div>
+        <div class="loader"></div>
+        <p class="scanning-text">Processing final results...</p>
+    `;
+    
+    // Continue with food matching
+    setTimeout(() => {
+        matchFoodToDatabase(consensusFood, base64Data);
+    }, 1000);
+}
+
+// ✅ NEW: Separate function to match food to database
+function matchFoodToDatabase(foodName, base64Data) {
+    // Food aliases for better AI matching
+    const foodAliases = {
+        // Proteins
+        'steak': 'beef',
+        'beef steak': 'beef',
+        'sirloin': 'beef',
+        'ribeye': 'beef',
+        'tenderloin': 'beef',
+        't-bone': 'beef',
+        'pork chop': 'pork',
+        'porkchop': 'pork',
+        'bacon': 'pork',
+        'ham': 'pork',
+        'grilled chicken': 'chicken',
+        'fried chicken': 'chicken',
+        'chicken breast': 'chicken',
+        'chicken thigh': 'chicken',
+        'roasted chicken': 'chicken',
+        'tilapia': 'fish',
+        'salmon': 'fish',
+        'tuna': 'fish',
+        'bangus': 'fish',
+        'milkfish': 'fish',
+        
+        // Carbs
+        'steamed rice': 'white rice',
+        'cooked rice': 'white rice',
+        'jasmine rice': 'white rice',
+        'fried rice': 'white rice',
+        'plain rice': 'white rice',
+        'spaghetti': 'pasta',
+        'noodles': 'pasta',
+        'macaroni': 'pasta',
+        'penne': 'pasta',
+        'linguine': 'pasta',
+        
+        // Breakfast
+        'fried egg': 'egg',
+        'scrambled egg': 'egg',
+        'boiled egg': 'egg',
+        'poached egg': 'egg',
+        'oats': 'oatmeal',
+        'porridge': 'oatmeal',
+        'toast': 'bread',
+        'sandwich bread': 'bread',
+        'sliced bread': 'bread',
+        
+        // Vegetables
+        'lettuce': 'salad',
+        'mixed greens': 'salad',
+        'caesar salad': 'salad',
+        'garden salad': 'salad',
+        'baked potato': 'potato',
+        'mashed potato': 'potato',
+        'french fries': 'fries',
+        'fries': 'fries',
+        'chips': 'fries',
+        
+        // Fruits
+        'orange juice': 'juice',
+        'green apple': 'apple',
+        'red apple': 'apple',
+        
+        // Fast Food
+        'hamburger': 'burger',
+        'cheeseburger': 'burger',
+        'pizza slice': 'pizza',
+        'hot dog': 'hotdog',
+        
+        // Snacks
+        'potato chip': 'chips',
+        'potato chips': 'chips',
+        'crisps': 'chips',
+        'peanuts': 'nuts',
+        'almonds': 'nuts',
+        'cashews': 'nuts',
+        'walnuts': 'nuts',
+        'chocolate bar': 'chocolate',
+        'candy bar': 'chocolate',
+        'milk chocolate': 'chocolate',
+        
+        // Beverages
+        'coke': 'soft drink',
+        'pepsi': 'soft drink',
+        'soda': 'soft drink',
+        'pop': 'soft drink',
+        'cola': 'soft drink',
+        'oj': 'juice',
+        'fruit juice': 'juice',
+        'black coffee': 'coffee',
+        'espresso': 'coffee',
+        
+        // Filipino
+        'chicken adobo': 'adobo',
+        'pork adobo': 'adobo',
+        'shanghai': 'lumpia',
+        'spring roll': 'lumpia',
+        'egg roll': 'lumpia',
+        'canton': 'pancit',
+        'bihon': 'pancit'
+    };
+    
+    // Clean up the AI response
+    let cleanedFoodName = foodName.toLowerCase().trim();
+    console.log('🔍 Looking for:', cleanedFoodName);
+    
+    // Try to match to our database with aliases
+    let matchedFood = null;
+    
+    // Step 1: Check if there's an exact alias match
+    if (foodAliases[cleanedFoodName]) {
+        matchedFood = foodAliases[cleanedFoodName];
+        console.log('✅ Alias match:', cleanedFoodName, '→', matchedFood);
+    }
+    
+    // Step 2: If no alias, try direct key matching
+    if (!matchedFood) {
+        for (let key in foods) {
+            if (cleanedFoodName.includes(key) || key.includes(cleanedFoodName)) {
+                matchedFood = key;
+                console.log('✅ Direct match:', cleanedFoodName, '→', matchedFood);
+                break;
+            }
+        }
+    }
+    
+    // Step 3: If still no match, try partial word matching with aliases
+    if (!matchedFood) {
+        for (let alias in foodAliases) {
+            if (cleanedFoodName.includes(alias) || alias.includes(cleanedFoodName)) {
+                matchedFood = foodAliases[alias];
+                console.log('✅ Partial alias match:', cleanedFoodName, '→', alias, '→', matchedFood);
+                break;
+            }
+        }
+    }
+    
+    if (matchedFood) {
+        showResults(matchedFood, foodName);
+    } else {
+        // Not in database → Ask AI for nutritional data
+        console.log('⚠️ Not in database, asking AI for nutritional info...');
+        
+        document.getElementById('modalBody').innerHTML = `
+            <h2>🤖 Getting Nutritional Data</h2>
+            <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
+            <div class="loader"></div>
+            <p class="scanning-text">Food detected: ${foodName}</p>
+            <p style="color: var(--text-light); font-size: 0.9em;">⚠️ Not in database - requesting AI nutritional analysis...</p>
+        `;
+        
+        // Ask AI for nutritional information
+        getAINutritionData(foodName, base64Data);
     }
 }
         // ============================================
@@ -3939,6 +3950,7 @@ Respond in this EXACT JSON format (no markdown, no backticks):
 </body>
 
 </html>
+
 
 
 

@@ -2,14 +2,14 @@
 const CACHE_NAME = 'calotrack-v1.1';
 
 // IMPORTANT: Update this to match your GitHub Pages path
-const BASE_PATH = '/calotrack';  // Change if your repo name is different
+const BASE_PATH = '/';  // Change if your repo name is different
 
 const urlsToCache = [
-  `${BASE_PATH}/`,
-  `${BASE_PATH}/index.html`,
-  `${BASE_PATH}/manifest.json`,
-  `${BASE_PATH}/icon-192.png`,
-  `${BASE_PATH}/icon-512.png`
+  `/`,
+  `/index.html`,
+  `/manifest.json`,
+  `/icon-192.png`,
+  `/icon-512.png`
 ];
 
 // Install event - cache essential files

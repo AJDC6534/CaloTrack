@@ -2531,6 +2531,60 @@
 
         // Google Gemini AI Analysis
         async function analyzeWithGemini() {
+            document.getElementById('modalBody').innerHTML = `
+        <h2>🤖 AI Analyzing Food</h2>
+        <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
+        <div class="loader"></div>
+        <p class="scanning-text">Google Gemini AI is analyzing your image...</p>
+    `;
+
+    try {
+        // ✅ ADD THESE DEBUG LOGS
+        console.log('🖼️ capturedImageData length:', capturedImageData?.length);
+        console.log('🖼️ capturedImageData starts with:', capturedImageData?.substring(0, 50));
+        
+        const base64Data = capturedImageData.split(',')[1];
+        
+        // ✅ ADD THIS CHECK
+        if (!base64Data) {
+            throw new Error('Failed to extract base64 data from image');
+        }
+        
+        console.log('📦 base64Data length:', base64Data.length);
+        console.log('📦 base64Data starts with:', base64Data.substring(0, 30));
+        
+        const requestBody = {
+            image: base64Data,
+            prompt: "Identify the main food item in this image. Respond with ONLY the food name in lowercase (e.g., 'pizza', 'banana', 'rice', 'salad'). If multiple foods are present, identify the main/largest one. Be specific but concise.",
+            model: 'gemini-2.0-flash'
+        };
+        
+        // ✅ LOG THE REQUEST
+        console.log('📤 Sending request:', {
+            imageLength: requestBody.image.length,
+            promptLength: requestBody.prompt.length,
+            model: requestBody.model
+        });
+        
+        console.log('🔄 Calling Netlify Function...');
+        
+        const response = await fetch('/.netlify/functions/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
+
+        console.log('📡 Response status:', response.status);
+
+        // ✅ LOG THE ERROR RESPONSE
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('❌ Error response:', errorData);
+            throw new Error(errorData.error || `API request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Full API response:', data);
     document.getElementById('modalBody').innerHTML = `
         <h2>🤖 AI Analyzing Food</h2>
         <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
@@ -3885,6 +3939,7 @@ Respond in this EXACT JSON format (no markdown, no backticks):
 </body>
 
 </html>
+
 
 
 

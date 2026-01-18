@@ -2057,16 +2057,6 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-    // Auth tab switching
-    document.querySelectorAll('.auth-tab').forEach(button => {
-        button.addEventListener('click', function() {
-            const tab = this.dataset.tab;
-            switchAuthTab(tab);
-        });
-    });
-});
-
         function switchAuthTab(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
@@ -2079,6 +2069,15 @@
         document.getElementById('signup-form').classList.add('active');
     }
 }
+        document.addEventListener('DOMContentLoaded', function() {
+    // Auth tab switching
+    document.querySelectorAll('.auth-tab').forEach(button => {
+        button.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            switchAuthTab(tab);
+        });
+    });
+});
 
         function checkAuth() {
             console.log('🔍 checkAuth() called - Checking for existing session...');
@@ -2611,16 +2610,10 @@
         }
         
         if (!data) {
-            throw new Error(lastError || 'All models failed');
-        }
-                // Check if we got a successful response
-                if (!response || !response.ok) {
-                    throw new Error(`All models failed. Last error: ${lastError}`);
-                }
+    throw new Error(lastError || 'All models failed');
+}
 
-                console.log('Response status:', response.status);
-                const data = await response.json();
-                console.log('Full API response:', data);
+console.log('Full API response:', data);
                 
                 // Check for API error
                 if (data.error) {
@@ -4002,6 +3995,7 @@ Respond in this EXACT JSON format (no markdown, no backticks):
     </script>
 </body>
 </html>
+
 
 
 

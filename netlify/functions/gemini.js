@@ -1,11 +1,21 @@
 const fetch = require('node-fetch');
 
+// Supported Gemini models
+const SUPPORTED_MODELS = [
+  'gemini-2.0-flash-exp',
+  'gemini-exp-1206',
+  'gemini-2.0-flash-thinking-exp-1219',
+  'gemini-1.5-pro',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b'
+];
+
 exports.handler = async (event, context) => {
   // Enable CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
     'Content-Type': 'application/json'
   };
 
@@ -18,7 +28,19 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // Only allow POST requests
+  // GET request to list available models
+  if (event.httpMethod === 'GET') {
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ 
+        models: SUPPORTED_MODELS,
+        defaultModel: 'gemini-2.0-flash-exp'
+      })
+    };
+  }
+
+  // Only allow POST requests for generation
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -28,7 +50,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { image, prompt, model = 'gemini-2.0-flash' } = JSON.parse(event.body);
+    const { image, prompt, model = 'gemini-2.0-flash-exp', models } = JSON.parse(event.body);
     
     // Validate input
     if (!image || !prompt) {
@@ -51,51 +73,101 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log('Calling Gemini API with model:', model);
+    // Determine which models to use
+    const modelsToUse = models && Array.isArray(models) && models.length > 0 
+      ? models.filter(m => SUPPORTED_MODELS.includes(m))
+      : [model];
 
-    // Call Gemini API
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: prompt },
-              {
-                inline_data: {
-                  mime_type: "image/jpeg",
-                  data: image
-                }
-              }
-            ]
-          }]
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    // Check if Gemini API returned an error
-    if (!response.ok) {
-      console.error('Gemini API error:', data);
+    // Validate selected models
+    const invalidModels = modelsToUse.filter(m => !SUPPORTED_MODELS.includes(m));
+    if (invalidModels.length > 0) {
       return {
-        statusCode: response.status,
+        statusCode: 400,
         headers,
         body: JSON.stringify({ 
-          error: data.error?.message || 'Gemini API request failed',
-          details: data 
+          error: 'Invalid model(s) specified',
+          invalidModels,
+          supportedModels: SUPPORTED_MODELS
         })
       };
     }
 
-    console.log('Gemini API success');
+    console.log('Calling Gemini API with models:', modelsToUse);
+
+    // Call Gemini API for each model
+    const results = await Promise.allSettled(
+      modelsToUse.map(async (modelName) => {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: prompt },
+                  {
+                    inline_data: {
+                      mime_type: "image/jpeg",
+                      data: image
+                    }
+                  }
+                ]
+              }]
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error?.message || 'Gemini API request failed');
+        }
+
+        return {
+          model: modelName,
+          response: data
+        };
+      })
+    );
+
+    // Process results
+    const responses = [];
+    const errors = [];
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        responses.push(result.value);
+      } else {
+        errors.push({
+          model: modelsToUse[index],
+          error: result.reason.message
+        });
+      }
+    });
+
+    console.log(`Success: ${responses.length}/${modelsToUse.length} models`);
+
+    // Return results
+    if (responses.length === 0) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'All models failed',
+          errors 
+        })
+      };
+    }
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        success: true,
+        results: responses,
+        ...(errors.length > 0 && { errors })
+      })
     };
 
   } catch (error) {

@@ -3987,9 +3987,20 @@ Respond in this EXACT JSON format (no markdown, no backticks):
             console.log('✅ PWA: App installed successfully!');
             deferredPrompt = null;
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+    // Auth tab switching
+    document.querySelectorAll('.auth-tab').forEach(button => {
+        button.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            switchAuthTab(tab);
+        });
+    });
+});
     </script>
 </body>
 </html>
+
 
 
 

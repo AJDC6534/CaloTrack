@@ -1573,25 +1573,7 @@
     <canvas id="canvas"></canvas>
 
     <script>
-        // ✅ ADD THIS AT THE VERY TOP - FIRST LINE AFTER <script>
-    console.log('🔍 Script starting...');
     
-    // Define switchAuthTab IMMEDIATELY
-    window.switchAuthTab = function(tab) {
-        console.log('✅ switchAuthTab called with:', tab);
-        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-        
-        if (tab === 'login') {
-            document.querySelectorAll('.auth-tab')[0].classList.add('active');
-            document.getElementById('login-form').classList.add('active');
-        } else {
-            document.querySelectorAll('.auth-tab')[1].classList.add('active');
-            document.getElementById('signup-form').classList.add('active');
-        }
-    };
-    
-    console.log('✅ switchAuthTab defined:', typeof window.switchAuthTab);
         // ============================================
         // 🔑 GOOGLE GEMINI API KEY
         // ============================================
@@ -3969,6 +3951,47 @@ Respond in this EXACT JSON format (no markdown, no backticks):
         } else {
             console.log('⚠️ PWA: Service Workers not supported in this browser');
         }
+
+        </style>
+    
+    <!-- ✅ ADD THIS SCRIPT BEFORE </head> -->
+        // Define switchAuthTab early so onclick handlers can find it
+        window.switchAuthTab = function(tab) {
+            console.log('Switching to tab:', tab);
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                document.getElementById('login-form').classList.add('active');
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+                document.getElementById('signup-form').classList.add('active');
+            }
+        };
+        document.addEventListener('DOMContentLoaded', function() {
+    // Define function first
+    window.switchAuthTab = function(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        
+        if (tab === 'login') {
+            document.querySelectorAll('.auth-tab')[0].classList.add('active');
+            document.getElementById('login-form').classList.add('active');
+        } else {
+            document.querySelectorAll('.auth-tab')[1].classList.add('active');
+            document.getElementById('signup-form').classList.add('active');
+        }
+    };
+    
+    // Add event listeners
+    document.querySelectorAll('.auth-tab').forEach(button => {
+        button.addEventListener('click', function() {
+            switchAuthTab(this.dataset.tab);
+        });
+    });
+});
+    
         
         // PWA Install prompt
         let deferredPrompt;
@@ -3993,6 +4016,7 @@ Respond in this EXACT JSON format (no markdown, no backticks):
     </script>
 </body>
 </html>
+
 
 
 

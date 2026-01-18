@@ -1584,7 +1584,8 @@
         // 2. Sign in with Google
         // 3. Click "Create API key"
         // 4. Copy and paste it below
-        const GEMINI_API_KEY = 'AIzaSyDF2i_oAFtNfYDtjxMBltkRJhB2ZlNLT08';
+        // API calls now go through our backend
+        const API_ENDPOINT = '/api/gemini';
         // ============================================
 
         // Global state
@@ -2551,66 +2552,57 @@
 
         // Google Gemini AI Analysis
         async function analyzeWithGemini() {
-            document.getElementById('modalBody').innerHTML = `
-                <h2>🤖 AI Analyzing Food</h2>
-                <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
-                <div class="loader"></div>
-                <p class="scanning-text">Google Gemini AI is analyzing your image...</p>
-            `;
+    document.getElementById('modalBody').innerHTML = `
+        <h2>🤖 AI Analyzing Food</h2>
+        <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
+        <div class="loader"></div>
+        <p class="scanning-text">Google Gemini AI is analyzing your image...</p>
+    `;
 
+    try {
+        const base64Data = capturedImageData.split(',')[1];
+        const models = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+        
+        let data = null;
+        let lastError = null;
+        
+        for (const model of models) {
             try {
-                const base64Data = capturedImageData.split(',')[1];
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: model,
+                        contents: [{
+                            parts: [
+                                {
+                                    text: "Identify the main food item in this image. Respond with ONLY the food name in lowercase (e.g., 'pizza', 'banana', 'rice', 'salad')."
+                                },
+                                {
+                                    inline_data: {
+                                        mime_type: "image/jpeg",
+                                        data: base64Data
+                                    }
+                                }
+                            ]
+                        }]
+                    })
+                });
                 
-                // Try v1 API with YOUR specific models from discovery tool
-                const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro', 'gemini-2.0-flash-lite'];
-                
-                let response = null;
-                let lastError = null;
-                
-                console.log('Starting Gemini API analysis...');
-                
-                for (const model of models) {
-                    try {
-                        console.log(`Trying v1/${model}...`);
-                        
-                        response = await fetch(
-                            `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-                            {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    contents: [{
-                                        parts: [
-                                            {
-                                                text: "Identify the main food item in this image. Respond with ONLY the food name in lowercase (e.g., 'pizza', 'banana', 'rice', 'salad'). If multiple foods are present, identify the main/largest one. Be specific but concise."
-                                            },
-                                            {
-                                                inline_data: {
-                                                    mime_type: "image/jpeg",
-                                                    data: base64Data
-                                                }
-                                            }
-                                        ]
-                                    }]
-                                })
-                            }
-                        );
-                        
-                        if (response.ok) {
-                            console.log(`✅ SUCCESS with v1/${model}!`);
-                            break; // Found a working model!
-                        }
-                        
-                        const errorData = await response.json();
-                        lastError = errorData.error?.message || 'Unknown error';
-                        console.log(`✗ Failed with v1/${model}:`, lastError);
-                        
-                    } catch (err) {
-                        lastError = err.message;
-                        console.log(`✗ Error with v1/${model}:`, err.message);
-                    }
+                if (response.ok) {
+                    data = await response.json();
+                    break;
                 }
                 
+                lastError = await response.text();
+            } catch (err) {
+                lastError = err.message;
+            }
+        }
+        
+        if (!data) {
+            throw new Error(lastError || 'All models failed');
+        }
                 // Check if we got a successful response
                 if (!response || !response.ok) {
                     throw new Error(`All models failed. Last error: ${lastError}`);
@@ -3998,3 +3990,4 @@ Respond in this EXACT JSON format (no markdown, no backticks):
     </script>
 </body>
 </html>
+

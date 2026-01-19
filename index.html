@@ -3931,10 +3931,7 @@ Respond in this EXACT JSON format (no markdown, no backticks):
         console.log('✅ Demo account setup complete');
         checkAuth();         // Check for existing session and load user data
         console.log('✅ Initialization complete');
-    </script>
     
-    <!-- PWA Service Worker Registration -->
-    <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js')
@@ -3965,7 +3962,7 @@ Respond in this EXACT JSON format (no markdown, no backticks):
             console.log('⚠️ PWA: Service Workers not supported in this browser');
         }
 
-        </style>    
+        
         // PWA Install prompt
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -3989,3 +3986,4 @@ Respond in this EXACT JSON format (no markdown, no backticks):
     </script>
 </body>
 </html>
+

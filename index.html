@@ -1179,25 +1179,12 @@
                 <p>Powered by Google Gemini Vision</p>
             </div>
 
-            <script>
-        function switchAuthTab(tab) {
-            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-            
-            if (tab === 'login') {
-                document.querySelectorAll('.auth-tab')[0].classList.add('active');
-                document.getElementById('login-form').classList.add('active');
-            } else {
-                document.querySelectorAll('.auth-tab')[1].classList.add('active');
-                document.getElementById('signup-form').classList.add('active');
-            }
-        }
-    </script>
+            <div class="login-body">
     
-    <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
-        <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
-    </div>
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+                    <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+                </div>
 
                 <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
                     <div class="form-group">
@@ -4002,17 +3989,3 @@ Respond in this EXACT JSON format (no markdown, no backticks):
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-

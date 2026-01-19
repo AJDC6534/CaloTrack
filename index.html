@@ -2374,11 +2374,6 @@ function switchAuthTab(tab) {
                 return;
             }
             
-            if (GEMINI_API_KEY === 'YOUR_API_KEY_HERE') {
-                alert('⚠️ Please configure your Gemini API key!\n\nEdit the source code and replace YOUR_API_KEY_HERE with your actual API key from:\nhttps://aistudio.google.com/app/apikey');
-                return;
-            }
-            
             if (method === 'camera') openCamera();
             else document.getElementById('fileInput').click();
         }
@@ -2570,7 +2565,8 @@ function switchAuthTab(tab) {
         
         for (const model of models) {
             try {
-                const response = await fetch(API_ENDPOINT, {
+                // ✅ Call your backend instead of Gemini directly
+                const response = await fetch('/api/gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2603,10 +2599,10 @@ function switchAuthTab(tab) {
         }
         
         if (!data) {
-    throw new Error(lastError || 'All models failed');
-}
+            throw new Error(lastError || 'All models failed');
+        }
 
-console.log('Full API response:', data);
+        console.log('Full API response:', data);
                 
                 // Check for API error
                 if (data.error) {
@@ -2845,8 +2841,8 @@ console.log('Full API response:', data);
         // ============================================
         
         async function getAINutritionData(foodName, base64Data) {
-            try {
-                const prompt = `For the food "${foodName}" shown in this image, provide nutritional information per typical serving.
+    try {
+        const prompt = `For the food "${foodName}" shown in this image, provide nutritional information per typical serving.
 
 Respond in this EXACT JSON format (no markdown, no backticks):
 {
@@ -2860,74 +2856,77 @@ Respond in this EXACT JSON format (no markdown, no backticks):
   "sugar": number
 }`;
 
-                console.log('🤖 Requesting nutritional data from AI...');
+        console.log('🤖 Requesting nutritional data from AI...');
+        
+        // Try models in order
+        const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
+        let data = null;
+        let lastError = null;
+        
+        for (const model of models) {
+            try {
+                // ✅ Call your backend instead of Gemini directly
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: model,
+                        contents: [{
+                            parts: [
+                                { text: prompt },
+                                {
+                                    inline_data: {
+                                        mime_type: "image/jpeg",
+                                        data: base64Data
+                                    }
+                                }
+                            ]
+                        }]
+                    })
+                });
                 
-                // Try models in order
-                const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
-                let response = null;
-                
-                for (const model of models) {
-                    try {
-                        response = await fetch(
-                            `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-                            {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    contents: [{
-                                        parts: [
-                                            { text: prompt },
-                                            {
-                                                inline_data: {
-                                                    mime_type: "image/jpeg",
-                                                    data: base64Data
-                                                }
-                                            }
-                                        ]
-                                    }]
-                                })
-                            }
-                        );
-                        
-                        if (response.ok) {
-                            console.log(`✅ Got nutrition data with ${model}`);
-                            break;
-                        }
-                    } catch (err) {
-                        console.log(`✗ Failed with ${model}:`, err.message);
-                    }
+                if (response.ok) {
+                    data = await response.json();
+                    console.log(`✅ Got nutrition data with ${model}`);
+                    break;
                 }
                 
-                if (!response || !response.ok) {
-                    throw new Error('Could not get nutritional data from AI');
-                }
-
-                //const data = await response.json();
-                const aiResponse = data.candidates[0].content.parts[0].text.trim();
-                
-                console.log('🤖 AI nutrition response:', aiResponse);
-                
-                // Parse JSON (remove markdown if present)
-                let jsonText = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-                const nutritionData = JSON.parse(jsonText);
-                
-                console.log('📊 Parsed nutrition data:', nutritionData);
-                
-                // Display the AI-provided nutritional data
-                displayAIFood(foodName, nutritionData);
-                
-            } catch (error) {
-                console.error('❌ Error getting nutrition data:', error);
-                document.getElementById('modalBody').innerHTML = `
-                    <h2>⚠️ Could Not Get Nutritional Data</h2>
-                    <div class="warning warning">
-                        <p>Sorry, we couldn't retrieve nutritional information for "${foodName}".</p>
-                        <p style="margin-top: 12px;">Try scanning a more common food from our database.</p>
-                    </div>
-                    <button class="btn btn-outline" onclick="closeModal()">Close</button>
-                `;
+                lastError = await response.text();
+            } catch (err) {
+                console.log(`✗ Failed with ${model}:`, err.message);
+                lastError = err.message;
             }
         }
+        
+        if (!data) {
+            throw new Error(lastError || 'Could not get nutritional data from AI');
+        }
+
+        const aiResponse = data.candidates[0].content.parts[0].text.trim();
+        
+        console.log('🤖 AI nutrition response:', aiResponse);
+        
+        // Parse JSON (remove markdown if present)
+        let jsonText = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const nutritionData = JSON.parse(jsonText);
+        
+        console.log('📊 Parsed nutrition data:', nutritionData);
+        
+        // Display the AI-provided nutritional data
+        displayAIFood(foodName, nutritionData);
+        
+    } catch (error) {
+        console.error('❌ Error getting nutrition data:', error);
+        document.getElementById('modalBody').innerHTML = `
+            <h2>⚠️ Could Not Get Nutritional Data</h2>
+            <div class="warning warning">
+                <p>Sorry, we couldn't retrieve nutritional information for "${foodName}".</p>
+                <p style="margin-top: 12px;">Try scanning a more common food from our database.</p>
+            </div>
+            <button class="btn btn-outline" onclick="closeModal()">Close</button>
+        `;
+    }
+}
         
         function displayAIFood(foodName, data) {
             const { emoji, serving, calories, carbs, protein, fat, sodium, sugar } = data;
@@ -3986,4 +3985,3 @@ Respond in this EXACT JSON format (no markdown, no backticks):
     </script>
 </body>
 </html>
-

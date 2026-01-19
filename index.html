@@ -2763,66 +2763,66 @@ Respond in this EXACT JSON format (no markdown, no backticks):
 // }
         
         function displayAIFood(foodName, data) {
-            const { emoji, serving, calories, carbs, protein, fat, sodium, sugar } = data;
-            const condition = userData.condition || 'None';
-            
-            // Generate dynamic warnings based on condition
-            const warnings = generateDynamicWarnings({ calories, carbs, protein, fat, sodium, sugar }, condition);
-            
-            document.getElementById('modalBody').innerHTML = `
-                <h2>✅ Food Analyzed!</h2>
-                <div class="food-result">
-                    <div class="food-icon">${emoji || '🍽️'}</div>
-                    <h3>${foodName}</h3>
-                    <p class="detection-note" style="color: var(--warning); font-weight: 500;">🤖 AI Estimated (not in database)</p>
-                    <p class="serving-size">📏 Serving: ${serving}</p>
-                </div>
-                
-                <div class="warning ${warnings.level}">
-                    <strong>${warnings.level === 'safe' ? '✅' : '⚠️'} ${warnings.level.toUpperCase()}</strong>
-                    <p>${warnings.message}</p>
-                </div>
-                
-                <div class="nutrition-grid">
-                    <div class="nutrition-item">
-                        <span class="nutrition-label">🔥 Calories</span>
-                        <span class="nutrition-value">${calories}</span>
-                    </div>
-                    <div class="nutrition-item">
-                        <span class="nutrition-label">🍞 Carbs</span>
-                        <span class="nutrition-value">${carbs}g</span>
-                    </div>
-                    <div class="nutrition-item">
-                        <span class="nutrition-label">🥩 Protein</span>
-                        <span class="nutrition-value">${protein}g</span>
-                    </div>
-                    <div class="nutrition-item">
-                        <span class="nutrition-label">🥑 Fat</span>
-                        <span class="nutrition-value">${fat}g</span>
-                    </div>
-                    <div class="nutrition-item">
-                        <span class="nutrition-label">🧂 Sodium</span>
-                        <span class="nutrition-value">${sodium}mg</span>
-                    </div>
-                    <div class="nutrition-item">
-                        <span class="nutrition-label">🍬 Sugar</span>
-                        <span class="nutrition-value">${sugar}g</span>
-                    </div>
-                </div>
-                
-                <div class="info-box" style="margin-top: 16px; background: #fff3cd; border-color: #ffc107;">
-                    <strong>ℹ️ Note:</strong> This food wasn't in our database, so nutritional values are AI estimates. 
-                    For more accurate tracking, add common foods to our database.
-                </div>
-                
-                <div class="modal-actions">
-                    <button class="btn" onclick="saveAIFood('${foodName.replace(/'/g, "\'")}', ${calories}, ${carbs}, ${protein}, ${fat}, ${sodium}, ${sugar})">
-                        ✅ Add to Tracker
-                    </button>
-                    <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                </div>
-            `;
-        }
+    const { emoji, serving, calories, carbs, protein, fat, sodium, sugar } = data;
+    const condition = userData.condition || 'None';
+    
+    // Generate dynamic warnings based on condition
+    const warnings = generateDynamicWarnings({ calories, carbs, protein, fat, sodium, sugar }, condition);
+    
+    document.getElementById('modalBody').innerHTML = `
+        <h2>✅ Food Analyzed!</h2>
+        <div class="food-result">
+            <div class="food-icon">${emoji || '🍽️'}</div>
+            <h3>${foodName}</h3>
+            <p class="detection-note" style="color: var(--primary); font-weight: 500;">🤖 Powered by Google Gemini AI</p>
+            <p class="serving-size">📏 Serving: ${serving}</p>
+        </div>
+        
+        <div class="warning ${warnings.level}">
+            <strong>${warnings.level === 'safe' ? '✅' : '⚠️'} ${warnings.level.toUpperCase()}</strong>
+            <p>${warnings.message}</p>
+        </div>
+        
+        <div class="nutrition-grid">
+            <div class="nutrition-item">
+                <span class="nutrition-label">🔥 Calories</span>
+                <span class="nutrition-value">${calories}</span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">🍞 Carbs</span>
+                <span class="nutrition-value">${carbs}g</span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">🥩 Protein</span>
+                <span class="nutrition-value">${protein}g</span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">🥑 Fat</span>
+                <span class="nutrition-value">${fat}g</span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">🧂 Sodium</span>
+                <span class="nutrition-value">${sodium}mg</span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">🍬 Sugar</span>
+                <span class="nutrition-value">${sugar}g</span>
+            </div>
+        </div>
+        
+        <div class="info-box" style="margin-top: 16px; background: #e3f2fd; border-color: #2196f3;">
+            <strong>🤖 AI Analysis:</strong> Nutritional values are analyzed by Google Gemini AI based on the image. 
+            Values are estimates for typical serving sizes.
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn" onclick="saveAIFood('${foodName.replace(/'/g, "\'")}', ${calories}, ${carbs}, ${protein}, ${fat}, ${sodium}, ${sugar})">
+                ✅ Add to Tracker
+            </button>
+            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        </div>
+    `;
+}
         
         function generateDynamicWarnings(data, condition) {
             const { calories, carbs, protein, fat, sodium, sugar } = data;

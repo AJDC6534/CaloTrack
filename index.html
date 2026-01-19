@@ -2558,14 +2558,14 @@ function switchAuthTab(tab) {
 
     try {
         const base64Data = capturedImageData.split(',')[1];
-        const models = ['gemini-2.5-flash', 'gemini-2.0-flash'];
         
-        let data = null;
+        // Step 1: Get food name from Gemini
+        const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
+        let foodData = null;
         let lastError = null;
         
         for (const model of models) {
             try {
-                // ✅ Call your backend instead of Gemini directly
                 const response = await fetch('/api/gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2574,7 +2574,20 @@ function switchAuthTab(tab) {
                         contents: [{
                             parts: [
                                 {
-                                    text: "Identify the main food item in this image. Respond with ONLY the food name in lowercase (e.g., 'pizza', 'banana', 'rice', 'salad')."
+                                    text: `Analyze this food image and provide nutritional information.
+
+Respond in this EXACT JSON format (no markdown, no backticks):
+{
+  "name": "food name in lowercase",
+  "emoji": "appropriate emoji",
+  "serving": "typical serving size",
+  "calories": number,
+  "carbs": number,
+  "protein": number,
+  "fat": number,
+  "sodium": number,
+  "sugar": number
+}`
                                 },
                                 {
                                     inline_data: {
@@ -2588,307 +2601,19 @@ function switchAuthTab(tab) {
                 });
                 
                 if (response.ok) {
-                    data = await response.json();
-                    break;
-                }
-                
-                lastError = await response.text();
-            } catch (err) {
-                lastError = err.message;
-            }
-        }
-        
-        if (!data) {
-            throw new Error(lastError || 'All models failed');
-        }
-
-        console.log('Full API response:', data);
-                
-                // Check for API error
-                if (data.error) {
-                    throw new Error(`API Error: ${data.error.message || 'Unknown error'}`);
-                }
-                
-                // Parse the food name
-                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-                    const foodName = data.candidates[0].content.parts[0].text.trim().toLowerCase();
-                    console.log('Gemini detected:', foodName);
+                    const data = await response.json();
                     
-                    // Food aliases for better AI matching
-                    const foodAliases = {
-                        // Proteins
-                        'steak': 'beef',
-                        'beef steak': 'beef',
-                        'sirloin': 'beef',
-                        'ribeye': 'beef',
-                        'tenderloin': 'beef',
-                        't-bone': 'beef',
-                        'pork chop': 'pork',
-                        'porkchop': 'pork',
-                        'bacon': 'pork',
-                        'ham': 'pork',
-                        'grilled chicken': 'chicken',
-                        'fried chicken': 'chicken',
-                        'chicken breast': 'chicken',
-                        'chicken thigh': 'chicken',
-                        'roasted chicken': 'chicken',
-                        'tilapia': 'fish',
-                        'salmon': 'fish',
-                        'tuna': 'fish',
-                        'bangus': 'fish',
-                        'milkfish': 'fish',
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                        const aiResponse = data.candidates[0].content.parts[0].text.trim();
+                        console.log('🤖 Gemini response:', aiResponse);
                         
-                        // Carbs
-                        'steamed rice': 'white rice',
-                        'cooked rice': 'white rice',
-                        'jasmine rice': 'white rice',
-                        'fried rice': 'white rice',
-                        'plain rice': 'white rice',
-                        'spaghetti': 'pasta',
-                        'noodles': 'pasta',
-                        'macaroni': 'pasta',
-                        'penne': 'pasta',
-                        'linguine': 'pasta',
+                        // Parse JSON (remove markdown if present)
+                        let jsonText = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                        foodData = JSON.parse(jsonText);
                         
-                        // Breakfast
-                        'fried egg': 'egg',
-                        'scrambled egg': 'egg',
-                        'boiled egg': 'egg',
-                        'poached egg': 'egg',
-                        'oats': 'oatmeal',
-                        'porridge': 'oatmeal',
-                        'toast': 'bread',
-                        'sandwich bread': 'bread',
-                        'sliced bread': 'bread',
-                        
-                        // Vegetables
-                        'lettuce': 'salad',
-                        'mixed greens': 'salad',
-                        'caesar salad': 'salad',
-                        'garden salad': 'salad',
-                        'baked potato': 'potato',
-                        'mashed potato': 'potato',
-                        'french fries': 'fries',
-                        'fries': 'fries',
-                        'chips': 'fries',
-                        
-                        // Fruits
-                        'orange juice': 'juice',
-                        'green apple': 'apple',
-                        'red apple': 'apple',
-                        
-                        // Fast Food
-                        'hamburger': 'burger',
-                        'cheeseburger': 'burger',
-                        'pizza slice': 'pizza',
-                        'hot dog': 'hotdog',
-                        
-                        // Snacks
-                        'potato chip': 'chips',
-                        'potato chips': 'chips',
-                        'crisps': 'chips',
-                        'peanuts': 'nuts',
-                        'almonds': 'nuts',
-                        'cashews': 'nuts',
-                        'walnuts': 'nuts',
-                        'chocolate bar': 'chocolate',
-                        'candy bar': 'chocolate',
-                        'milk chocolate': 'chocolate',
-                        
-                        // Beverages
-                        'coke': 'soft drink',
-                        'pepsi': 'soft drink',
-                        'soda': 'soft drink',
-                        'pop': 'soft drink',
-                        'cola': 'soft drink',
-                        'oj': 'juice',
-                        'fruit juice': 'juice',
-                        'black coffee': 'coffee',
-                        'espresso': 'coffee',
-                        
-                        // Filipino
-                        'chicken adobo': 'adobo',
-                        'pork adobo': 'adobo',
-                        'shanghai': 'lumpia',
-                        'spring roll': 'lumpia',
-                        'egg roll': 'lumpia',
-                        'canton': 'pancit',
-                        'bihon': 'pancit'
-                    };
-                    
-                    // Clean up the AI response
-                    let cleanedFoodName = foodName.toLowerCase().trim();
-                    console.log('🔍 Looking for:', cleanedFoodName);
-                    
-                    // Try to match to our database with aliases
-                    let matchedFood = null;
-                    
-                    // Step 1: Check if there's an exact alias match
-                    if (foodAliases[cleanedFoodName]) {
-                        matchedFood = foodAliases[cleanedFoodName];
-                        console.log('✅ Alias match:', cleanedFoodName, '→', matchedFood);
+                        console.log('✅ Parsed food data:', foodData);
+                        break;
                     }
-                    
-                    // Step 2: If no alias, try direct key matching
-                    if (!matchedFood) {
-                        for (let key in foods) {
-                            if (cleanedFoodName.includes(key) || key.includes(cleanedFoodName)) {
-                                matchedFood = key;
-                                console.log('✅ Direct match:', cleanedFoodName, '→', matchedFood);
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // Step 3: If still no match, try partial word matching with aliases
-                    if (!matchedFood) {
-                        for (let alias in foodAliases) {
-                            if (cleanedFoodName.includes(alias) || alias.includes(cleanedFoodName)) {
-                                matchedFood = foodAliases[alias];
-                                console.log('✅ Partial alias match:', cleanedFoodName, '→', alias, '→', matchedFood);
-                                break;
-                            }
-                        }
-                    }
-                    
-                    if (matchedFood) {
-                        showResults(matchedFood, foodName);
-                    } else {
-                        // 🔥 HYBRID: Not in database → Ask AI for nutritional data
-                        console.log('⚠️ Not in database, asking AI for nutritional info...');
-                        
-                        document.getElementById('modalBody').innerHTML = `
-                            <h2>🤖 Getting Nutritional Data</h2>
-                            <img src="${capturedImageData}" class="captured-image" style="opacity: 0.3;">
-                            <div class="loader"></div>
-                            <p class="scanning-text">Food detected: ${foodName}</p>
-                            <p style="color: var(--text-light); font-size: 0.9em;">⚠️ Not in database - requesting AI nutritional analysis...</p>
-                        `;
-                        
-                        // Ask AI for nutritional information
-                        await getAINutritionData(foodName, base64Data);
-                    }
-                } else {
-                    console.error('Unexpected response structure:', data);
-                    throw new Error('Gemini API returned an unexpected response format. Check console for details.');
-                }
-                
-            } catch (error) {
-                console.error('Gemini API Error:', error);
-                
-                let errorMessage = error.message;
-                let troubleshootingSteps = '';
-                
-                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                    errorMessage = 'Network error - Could not connect to Gemini API';
-                    troubleshootingSteps = `
-                        <div style="text-align: left; margin-top: 16px; font-size: 0.85em;">
-                            <strong>Troubleshooting:</strong><br>
-                            • Check your internet connection<br>
-                            • Make sure you're not behind a strict firewall<br>
-                            • Try disabling browser extensions
-                        </div>
-                    `;
-                } else if (error.message.includes('API_KEY_INVALID') || error.message.includes('400')) {
-                    errorMessage = 'Invalid API Key';
-                    troubleshootingSteps = `
-                        <div style="text-align: left; margin-top: 16px; font-size: 0.85em;">
-                            <strong>Fix:</strong><br>
-                            1. Get a valid API key from:<br>
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--primary);">https://aistudio.google.com/app/apikey</a><br>
-                            2. Open the HTML file in a text editor<br>
-                            3. Replace 'YOUR_API_KEY_HERE' with your key at line 1109<br>
-                            4. Save and reload the page
-                        </div>
-                    `;
-                } else if (error.message.includes('PERMISSION_DENIED') || error.message.includes('403')) {
-                    errorMessage = 'API Key lacks permission or quota exceeded';
-                    troubleshootingSteps = `
-                        <div style="text-align: left; margin-top: 16px; font-size: 0.85em;">
-                            <strong>Possible causes:</strong><br>
-                            • API key doesn't have Gemini API enabled<br>
-                            • Daily quota exceeded (free tier: 1500/day)<br>
-                            • API key is restricted to specific websites
-                        </div>
-                    `;
-                }
-                
-                document.getElementById('modalBody').innerHTML = `
-                    <h2>⚠️ Analysis Error</h2>
-                    <div class="warning danger">
-                        <div class="warning-title">
-                            <span class="warning-icon">❌</span>
-                            AI Analysis Failed
-                        </div>
-                        <p><strong>Error:</strong> ${errorMessage}</p>
-                        ${troubleshootingSteps}
-                    </div>
-                    <div class="info-box" style="margin-top: 20px; text-align: left;">
-                        <strong>📋 Debug Info:</strong><br>
-                        API Key configured: ${GEMINI_API_KEY !== 'YOUR_API_KEY_HERE' ? 'Yes' : 'No'}<br>
-                        Check browser console (F12) for more details
-                    </div>
-                    <div class="camera-controls">
-                        <button class="btn btn-outline" onclick="openCamera()">Try Again</button>
-                        <button class="btn btn-outline" onclick="closeModal()">Close</button>
-                    </div>
-                `;
-            }
-        }
-
-        // ============================================
-        // 🎯 HYBRID APPROACH HELPER FUNCTIONS
-        // ============================================
-        
-        async function getAINutritionData(foodName, base64Data) {
-    try {
-        const prompt = `For the food "${foodName}" shown in this image, provide nutritional information per typical serving.
-
-Respond in this EXACT JSON format (no markdown, no backticks):
-{
-  "emoji": "appropriate emoji",
-  "serving": "typical serving size",
-  "calories": number,
-  "carbs": number,
-  "protein": number,
-  "fat": number,
-  "sodium": number,
-  "sugar": number
-}`;
-
-        console.log('🤖 Requesting nutritional data from AI...');
-        
-        // Try models in order
-        const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
-        let data = null;
-        let lastError = null;
-        
-        for (const model of models) {
-            try {
-                // ✅ Call your backend instead of Gemini directly
-                const response = await fetch('/api/gemini', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: model,
-                        contents: [{
-                            parts: [
-                                { text: prompt },
-                                {
-                                    inline_data: {
-                                        mime_type: "image/jpeg",
-                                        data: base64Data
-                                    }
-                                }
-                            ]
-                        }]
-                    })
-                });
-                
-                if (response.ok) {
-                    data = await response.json();
-                    console.log(`✅ Got nutrition data with ${model}`);
-                    break;
                 }
                 
                 lastError = await response.text();
@@ -2898,35 +2623,144 @@ Respond in this EXACT JSON format (no markdown, no backticks):
             }
         }
         
-        if (!data) {
-            throw new Error(lastError || 'Could not get nutritional data from AI');
+        if (!foodData) {
+            throw new Error(lastError || 'Could not analyze food with Gemini AI');
         }
 
-        const aiResponse = data.candidates[0].content.parts[0].text.trim();
-        
-        console.log('🤖 AI nutrition response:', aiResponse);
-        
-        // Parse JSON (remove markdown if present)
-        let jsonText = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-        const nutritionData = JSON.parse(jsonText);
-        
-        console.log('📊 Parsed nutrition data:', nutritionData);
-        
         // Display the AI-provided nutritional data
-        displayAIFood(foodName, nutritionData);
+        displayAIFood(foodData.name, foodData);
         
     } catch (error) {
-        console.error('❌ Error getting nutrition data:', error);
+        console.error('Gemini API Error:', error);
+        
+        let errorMessage = error.message;
+        let troubleshootingSteps = '';
+        
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            errorMessage = 'Network error - Could not connect to Gemini API';
+            troubleshootingSteps = `
+                <div style="text-align: left; margin-top: 16px; font-size: 0.85em;">
+                    <strong>Troubleshooting:</strong><br>
+                    • Check your internet connection<br>
+                    • Make sure the server is running<br>
+                    • Check browser console for details
+                </div>
+            `;
+        } else if (error.message.includes('Invalid API Key') || error.message.includes('400')) {
+            errorMessage = 'Invalid API Key on server';
+            troubleshootingSteps = `
+                <div style="text-align: left; margin-top: 16px; font-size: 0.85em;">
+                    <strong>Fix:</strong><br>
+                    • Check that GEMINI_API_KEY is set in Render environment variables<br>
+                    • Verify the API key is valid at:<br>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--primary);">https://aistudio.google.com/app/apikey</a>
+                </div>
+            `;
+        }
+        
         document.getElementById('modalBody').innerHTML = `
-            <h2>⚠️ Could Not Get Nutritional Data</h2>
-            <div class="warning warning">
-                <p>Sorry, we couldn't retrieve nutritional information for "${foodName}".</p>
-                <p style="margin-top: 12px;">Try scanning a more common food from our database.</p>
+            <h2>❌ ${errorMessage}</h2>
+            <div class="warning">
+                <p>Could not analyze the food image.</p>
+                ${troubleshootingSteps}
             </div>
             <button class="btn btn-outline" onclick="closeModal()">Close</button>
+            <button class="btn btn-primary" onclick="analyzeWithGemini()" style="margin-left: 8px;">Retry</button>
         `;
     }
 }
+
+        // ============================================
+        // 🎯 HYBRID APPROACH HELPER FUNCTIONS
+        // ============================================
+        
+//         async function getAINutritionData(foodName, base64Data) {
+//     try {
+//         const prompt = `For the food "${foodName}" shown in this image, provide nutritional information per typical serving.
+
+// Respond in this EXACT JSON format (no markdown, no backticks):
+// {
+//   "emoji": "appropriate emoji",
+//   "serving": "typical serving size",
+//   "calories": number,
+//   "carbs": number,
+//   "protein": number,
+//   "fat": number,
+//   "sodium": number,
+//   "sugar": number
+// }`;
+
+//         console.log('🤖 Requesting nutritional data from AI...');
+        
+//         // Try models in order
+//         const models = ['gemini-2.0-flash', 'gemini-2.5-flash'];
+//         let data = null;
+//         let lastError = null;
+        
+//         for (const model of models) {
+//             try {
+//                 // ✅ Call your backend instead of Gemini directly
+//                 const response = await fetch('/api/gemini', {
+//                     method: 'POST',
+//                     headers: { 'Content-Type': 'application/json' },
+//                     body: JSON.stringify({
+//                         model: model,
+//                         contents: [{
+//                             parts: [
+//                                 { text: prompt },
+//                                 {
+//                                     inline_data: {
+//                                         mime_type: "image/jpeg",
+//                                         data: base64Data
+//                                     }
+//                                 }
+//                             ]
+//                         }]
+//                     })
+//                 });
+                
+//                 if (response.ok) {
+//                     data = await response.json();
+//                     console.log(`✅ Got nutrition data with ${model}`);
+//                     break;
+//                 }
+                
+//                 lastError = await response.text();
+//             } catch (err) {
+//                 console.log(`✗ Failed with ${model}:`, err.message);
+//                 lastError = err.message;
+//             }
+//         }
+        
+//         if (!data) {
+//             throw new Error(lastError || 'Could not get nutritional data from AI');
+//         }
+
+//         const aiResponse = data.candidates[0].content.parts[0].text.trim();
+        
+//         console.log('🤖 AI nutrition response:', aiResponse);
+        
+//         // Parse JSON (remove markdown if present)
+//         let jsonText = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+//         const nutritionData = JSON.parse(jsonText);
+        
+//         console.log('📊 Parsed nutrition data:', nutritionData);
+        
+//         // Display the AI-provided nutritional data
+//         displayAIFood(foodName, nutritionData);
+        
+//     } catch (error) {
+//         console.error('❌ Error getting nutrition data:', error);
+//         document.getElementById('modalBody').innerHTML = `
+//             <h2>⚠️ Could Not Get Nutritional Data</h2>
+//             <div class="warning warning">
+//                 <p>Sorry, we couldn't retrieve nutritional information for "${foodName}".</p>
+//                 <p style="margin-top: 12px;">Try scanning a more common food from our database.</p>
+//             </div>
+//             <button class="btn btn-outline" onclick="closeModal()">Close</button>
+//         `;
+//     }
+// }
         
         function displayAIFood(foodName, data) {
             const { emoji, serving, calories, carbs, protein, fat, sodium, sugar } = data;

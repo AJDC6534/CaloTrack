@@ -1603,441 +1603,441 @@
         let healthReminders = [];
 
         // Food database with nutritional info
-        const foods = {
-            // ========== BREAKFAST FOODS ==========
-            'egg': {
-                name: 'Boiled Egg', emoji: '🥚', calories: 78, carbs: 0.6, protein: 6, fat: 5, sodium: 62, sugar: 0.6,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'High protein, low carbs.', recommendation: 'Great breakfast!' },
-                    'Hypertension': { level: 'safe', message: 'GOOD', detail: 'Low sodium.', recommendation: 'Good choice!' },
-                    'Heart Disease': { level: 'warning', message: 'MODERATE', detail: 'Contains cholesterol.', recommendation: 'Limit to 1 per day.' },
-                    'None': { level: 'safe', message: 'HEALTHY', detail: 'Protein-rich.', recommendation: 'Excellent!' }
-                }
-            },
-            'oatmeal': {
-                name: 'Oatmeal', emoji: '🥣', calories: 154, carbs: 27, protein: 6, fat: 3, sodium: 9, sugar: 1,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low glycemic, high fiber.', recommendation: 'Perfect breakfast!' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Great choice!' },
-                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Lowers cholesterol.', recommendation: 'Ideal!' },
-                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'High fiber, nutritious.', recommendation: 'Start your day right!' }
-                }
-            },
-            'pancake': {
-                name: 'Pancake', emoji: '🥞', calories: 227, carbs: 28, protein: 6, fat: 10, sodium: 439, sugar: 8,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'EAT LESS', detail: 'High carbs and sugar.', recommendation: 'Limit to 1-2 pieces.' },
-                    'Hypertension': { level: 'warning', message: 'MODERATE', detail: '439mg sodium.', recommendation: 'Occasional treat.' },
-                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '10g fat.', recommendation: 'Use whole wheat.' },
-                    'None': { level: 'warning', message: 'OCCASIONAL', detail: 'High in refined carbs.', recommendation: 'Weekend treat.' }
-                }
-            },
-            'bread': {
-                name: 'White Bread', emoji: '🍞', calories: 79, carbs: 15, protein: 2.7, fat: 1, sodium: 147, sugar: 1.5,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'CHOOSE WHOLE WHEAT', detail: 'High glycemic index.', recommendation: 'Switch to whole grain.' },
-                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: '147mg sodium per slice.', recommendation: 'Limit to 2 slices.' },
-                    'Heart Disease': { level: 'safe', message: 'OK', detail: 'Low fat.', recommendation: 'Choose whole grain.' },
-                    'None': { level: 'safe', message: 'COMMON FOOD', detail: 'Basic carb source.', recommendation: 'Whole grain is better.' }
-                }
-            },
-            'cereal': {
-                name: 'Breakfast Cereal', emoji: '🥣', calories: 110, carbs: 24, protein: 2, fat: 1, sodium: 160, sugar: 12,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'WATCH SUGAR', detail: '12g sugar per serving.', recommendation: 'Choose low-sugar brand.' },
-                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: '160mg sodium.', recommendation: 'Check label.' },
-                    'Heart Disease': { level: 'safe', message: 'OK', detail: 'Low fat.', recommendation: 'Choose whole grain.' },
-                    'None': { level: 'warning', message: 'CHECK LABEL', detail: 'Many brands high in sugar.', recommendation: 'Read nutrition facts.' }
-                }
-            },
+        // const foods = {
+        //     // ========== BREAKFAST FOODS ==========
+        //     'egg': {
+        //         name: 'Boiled Egg', emoji: '🥚', calories: 78, carbs: 0.6, protein: 6, fat: 5, sodium: 62, sugar: 0.6,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'High protein, low carbs.', recommendation: 'Great breakfast!' },
+        //             'Hypertension': { level: 'safe', message: 'GOOD', detail: 'Low sodium.', recommendation: 'Good choice!' },
+        //             'Heart Disease': { level: 'warning', message: 'MODERATE', detail: 'Contains cholesterol.', recommendation: 'Limit to 1 per day.' },
+        //             'None': { level: 'safe', message: 'HEALTHY', detail: 'Protein-rich.', recommendation: 'Excellent!' }
+        //         }
+        //     },
+        //     'oatmeal': {
+        //         name: 'Oatmeal', emoji: '🥣', calories: 154, carbs: 27, protein: 6, fat: 3, sodium: 9, sugar: 1,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low glycemic, high fiber.', recommendation: 'Perfect breakfast!' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Great choice!' },
+        //             'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Lowers cholesterol.', recommendation: 'Ideal!' },
+        //             'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'High fiber, nutritious.', recommendation: 'Start your day right!' }
+        //         }
+        //     },
+        //     'pancake': {
+        //         name: 'Pancake', emoji: '🥞', calories: 227, carbs: 28, protein: 6, fat: 10, sodium: 439, sugar: 8,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'EAT LESS', detail: 'High carbs and sugar.', recommendation: 'Limit to 1-2 pieces.' },
+        //             'Hypertension': { level: 'warning', message: 'MODERATE', detail: '439mg sodium.', recommendation: 'Occasional treat.' },
+        //             'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '10g fat.', recommendation: 'Use whole wheat.' },
+        //             'None': { level: 'warning', message: 'OCCASIONAL', detail: 'High in refined carbs.', recommendation: 'Weekend treat.' }
+        //         }
+        //     },
+        //     'bread': {
+        //         name: 'White Bread', emoji: '🍞', calories: 79, carbs: 15, protein: 2.7, fat: 1, sodium: 147, sugar: 1.5,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'CHOOSE WHOLE WHEAT', detail: 'High glycemic index.', recommendation: 'Switch to whole grain.' },
+        //             'Hypertension': { level: 'safe', message: 'MODERATE', detail: '147mg sodium per slice.', recommendation: 'Limit to 2 slices.' },
+        //             'Heart Disease': { level: 'safe', message: 'OK', detail: 'Low fat.', recommendation: 'Choose whole grain.' },
+        //             'None': { level: 'safe', message: 'COMMON FOOD', detail: 'Basic carb source.', recommendation: 'Whole grain is better.' }
+        //         }
+        //     },
+        //     'cereal': {
+        //         name: 'Breakfast Cereal', emoji: '🥣', calories: 110, carbs: 24, protein: 2, fat: 1, sodium: 160, sugar: 12,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'WATCH SUGAR', detail: '12g sugar per serving.', recommendation: 'Choose low-sugar brand.' },
+        //             'Hypertension': { level: 'safe', message: 'MODERATE', detail: '160mg sodium.', recommendation: 'Check label.' },
+        //             'Heart Disease': { level: 'safe', message: 'OK', detail: 'Low fat.', recommendation: 'Choose whole grain.' },
+        //             'None': { level: 'warning', message: 'CHECK LABEL', detail: 'Many brands high in sugar.', recommendation: 'Read nutrition facts.' }
+        //         }
+        //     },
 
-            // ========== PROTEINS ==========
-            'chicken': {
-                name: 'Grilled Chicken', emoji: '🍗', calories: 165, carbs: 0, protein: 31, fat: 3.6, sodium: 74, sugar: 0,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'High protein, no carbs.', recommendation: 'Perfect choice!' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium when grilled.', recommendation: 'Great option!' },
-                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Lean protein.', recommendation: 'Remove skin!' },
-                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Lean protein source.', recommendation: 'Excellent!' }
-                }
-            },
-            'chicken adobo': {
-                name: 'Chicken Adobo', emoji: '🍗', calories: 290, carbs: 8, protein: 32, fat: 15, sodium: 680, sugar: 3,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein, moderate carbs.', recommendation: 'Enjoy!' },
-                    'Hypertension': { level: 'warning', message: 'WATCH SODIUM', detail: '680mg sodium.', recommendation: 'Reduce soy sauce.' },
-                    'Heart Disease': { level: 'warning', message: 'MODERATE', detail: '15g fat.', recommendation: 'Remove skin.' },
-                    'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Filipino favorite.', recommendation: 'Enjoy!' }
-                }
-            },
-            'fish': {
-                name: 'Grilled Fish', emoji: '🐟', calories: 206, carbs: 0, protein: 41, fat: 3, sodium: 90, sugar: 0,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'High protein, no carbs.', recommendation: 'Perfect!' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Great choice!' },
-                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Omega-3 rich!', recommendation: 'Eat often!' },
-                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Heart-healthy fats.', recommendation: 'Excellent!' }
-                }
-            },
-            'beef': {
-                name: 'Beef Steak', emoji: '🥩', calories: 271, carbs: 0, protein: 25, fat: 19, sodium: 72, sugar: 0,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein.', recommendation: 'Lean cuts best!' },
-                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'Low sodium.', recommendation: 'Trim visible fat.' },
-                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '19g fat, saturated.', recommendation: 'Choose lean cuts.' },
-                    'None': { level: 'warning', message: 'MODERATE', detail: 'High in saturated fat.', recommendation: 'Occasional treat.' }
-                }
-            },
-            'pork': {
-                name: 'Pork Chop', emoji: '🥓', calories: 242, carbs: 0, protein: 27, fat: 14, sodium: 62, sugar: 0,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein.', recommendation: 'Trim fat!' },
-                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'Low sodium.', recommendation: 'Remove fat.' },
-                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '14g fat.', recommendation: 'Choose lean cuts.' },
-                    'None': { level: 'warning', message: 'MODERATE', detail: 'Higher in fat.', recommendation: 'Lean cuts better.' }
-                }
-            },
-            'tofu': {
-                name: 'Tofu', emoji: '🧈', calories: 76, carbs: 2, protein: 8, fat: 5, sodium: 7, sugar: 0,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low carbs, good protein.', recommendation: 'Great alternative!' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Very low sodium.', recommendation: 'Perfect!' },
-                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Plant-based protein.', recommendation: 'Excellent!' },
-                    'None': { level: 'safe', message: 'HEALTHY', detail: 'Versatile protein.', recommendation: 'Great option!' }
-                }
-            },
+        //     // ========== PROTEINS ==========
+        //     'chicken': {
+        //         name: 'Grilled Chicken', emoji: '🍗', calories: 165, carbs: 0, protein: 31, fat: 3.6, sodium: 74, sugar: 0,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'High protein, no carbs.', recommendation: 'Perfect choice!' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium when grilled.', recommendation: 'Great option!' },
+        //             'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Lean protein.', recommendation: 'Remove skin!' },
+        //             'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Lean protein source.', recommendation: 'Excellent!' }
+        //         }
+        //     },
+        //     'chicken adobo': {
+        //         name: 'Chicken Adobo', emoji: '🍗', calories: 290, carbs: 8, protein: 32, fat: 15, sodium: 680, sugar: 3,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein, moderate carbs.', recommendation: 'Enjoy!' },
+        //             'Hypertension': { level: 'warning', message: 'WATCH SODIUM', detail: '680mg sodium.', recommendation: 'Reduce soy sauce.' },
+        //             'Heart Disease': { level: 'warning', message: 'MODERATE', detail: '15g fat.', recommendation: 'Remove skin.' },
+        //             'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Filipino favorite.', recommendation: 'Enjoy!' }
+        //         }
+        //     },
+        //     'fish': {
+        //         name: 'Grilled Fish', emoji: '🐟', calories: 206, carbs: 0, protein: 41, fat: 3, sodium: 90, sugar: 0,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'High protein, no carbs.', recommendation: 'Perfect!' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Great choice!' },
+        //             'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Omega-3 rich!', recommendation: 'Eat often!' },
+        //             'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Heart-healthy fats.', recommendation: 'Excellent!' }
+        //         }
+        //     },
+        //     'beef': {
+        //         name: 'Beef Steak', emoji: '🥩', calories: 271, carbs: 0, protein: 25, fat: 19, sodium: 72, sugar: 0,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein.', recommendation: 'Lean cuts best!' },
+        //             'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'Low sodium.', recommendation: 'Trim visible fat.' },
+        //             'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '19g fat, saturated.', recommendation: 'Choose lean cuts.' },
+        //             'None': { level: 'warning', message: 'MODERATE', detail: 'High in saturated fat.', recommendation: 'Occasional treat.' }
+        //         }
+        //     },
+        //     'pork': {
+        //         name: 'Pork Chop', emoji: '🥓', calories: 242, carbs: 0, protein: 27, fat: 14, sodium: 62, sugar: 0,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein.', recommendation: 'Trim fat!' },
+        //             'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'Low sodium.', recommendation: 'Remove fat.' },
+        //             'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '14g fat.', recommendation: 'Choose lean cuts.' },
+        //             'None': { level: 'warning', message: 'MODERATE', detail: 'Higher in fat.', recommendation: 'Lean cuts better.' }
+        //         }
+        //     },
+        //     'tofu': {
+        //         name: 'Tofu', emoji: '🧈', calories: 76, carbs: 2, protein: 8, fat: 5, sodium: 7, sugar: 0,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low carbs, good protein.', recommendation: 'Great alternative!' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Very low sodium.', recommendation: 'Perfect!' },
+        //             'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Plant-based protein.', recommendation: 'Excellent!' },
+        //             'None': { level: 'safe', message: 'HEALTHY', detail: 'Versatile protein.', recommendation: 'Great option!' }
+        //         }
+        //     },
 
-            // ========== VEGETABLES ==========
-            'broccoli': {
-                name: 'Broccoli', emoji: '🥦', calories: 55, carbs: 11, protein: 4, fat: 0.6, sodium: 52, sugar: 2,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low calories, high fiber.', recommendation: 'Eat lots!' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Perfect!' },
-                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-protective.', recommendation: 'Eat daily!' },
-                    'None': { level: 'safe', message: 'SUPERFOOD', detail: 'Packed with nutrients.', recommendation: 'Eat often!' }
-                }
-            },
-            'carrot': {
-                name: 'Carrot', emoji: '🥕', calories: 41, carbs: 10, protein: 1, fat: 0.2, sodium: 69, sugar: 5,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'Moderate carbs, high fiber.', recommendation: 'Great snack!' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Excellent!' },
-                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Great choice!' },
-                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Rich in vitamin A.', recommendation: 'Eat regularly!' }
-                }
-            },
-            'salad': {
-                name: 'Green Salad', emoji: '🥗', calories: 52, carbs: 8, protein: 3, fat: 1, sodium: 89, sugar: 4,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low carbs, high fiber.', recommendation: 'Perfect!' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Great!' },
-                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-healthy.', recommendation: 'Perfect!' },
-                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Low calorie, nutritious.', recommendation: 'Eat more!' }
-                }
-            },
-            'tomato': {
-                name: 'Tomato', emoji: '🍅', calories: 22, carbs: 5, protein: 1, fat: 0.2, sodium: 6, sugar: 3,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Very low carbs.', recommendation: 'Great choice!' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Very low sodium.', recommendation: 'Perfect!' },
-                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Lycopene-rich!', recommendation: 'Eat often!' },
-                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Rich in antioxidants.', recommendation: 'Add to meals!' }
-                }
-            },
-            'potato': {
-                name: 'Baked Potato', emoji: '🥔', calories: 161, carbs: 37, protein: 4, fat: 0.2, sodium: 13, sugar: 2,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'EAT LESS', detail: '37g carbs, high glycemic.', recommendation: 'Small portion.' },
-                    'Hypertension': { level: 'safe', message: 'GOOD', detail: 'Low sodium, high potassium.', recommendation: 'Good choice!' },
-                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Very low fat.', recommendation: 'Good!' },
-                    'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Good carb source.', recommendation: 'Enjoy!' }
-                }
-            },
+        //     // ========== VEGETABLES ==========
+        //     'broccoli': {
+        //         name: 'Broccoli', emoji: '🥦', calories: 55, carbs: 11, protein: 4, fat: 0.6, sodium: 52, sugar: 2,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low calories, high fiber.', recommendation: 'Eat lots!' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Perfect!' },
+        //             'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-protective.', recommendation: 'Eat daily!' },
+        //             'None': { level: 'safe', message: 'SUPERFOOD', detail: 'Packed with nutrients.', recommendation: 'Eat often!' }
+        //         }
+        //     },
+        //     'carrot': {
+        //         name: 'Carrot', emoji: '🥕', calories: 41, carbs: 10, protein: 1, fat: 0.2, sodium: 69, sugar: 5,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'GOOD', detail: 'Moderate carbs, high fiber.', recommendation: 'Great snack!' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Excellent!' },
+        //             'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Great choice!' },
+        //             'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Rich in vitamin A.', recommendation: 'Eat regularly!' }
+        //         }
+        //     },
+        //     'salad': {
+        //         name: 'Green Salad', emoji: '🥗', calories: 52, carbs: 8, protein: 3, fat: 1, sodium: 89, sugar: 4,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low carbs, high fiber.', recommendation: 'Perfect!' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Great!' },
+        //             'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-healthy.', recommendation: 'Perfect!' },
+        //             'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Low calorie, nutritious.', recommendation: 'Eat more!' }
+        //         }
+        //     },
+        //     'tomato': {
+        //         name: 'Tomato', emoji: '🍅', calories: 22, carbs: 5, protein: 1, fat: 0.2, sodium: 6, sugar: 3,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Very low carbs.', recommendation: 'Great choice!' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Very low sodium.', recommendation: 'Perfect!' },
+        //             'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Lycopene-rich!', recommendation: 'Eat often!' },
+        //             'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Rich in antioxidants.', recommendation: 'Add to meals!' }
+        //         }
+        //     },
+        //     'potato': {
+        //         name: 'Baked Potato', emoji: '🥔', calories: 161, carbs: 37, protein: 4, fat: 0.2, sodium: 13, sugar: 2,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'EAT LESS', detail: '37g carbs, high glycemic.', recommendation: 'Small portion.' },
+        //             'Hypertension': { level: 'safe', message: 'GOOD', detail: 'Low sodium, high potassium.', recommendation: 'Good choice!' },
+        //             'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Very low fat.', recommendation: 'Good!' },
+        //             'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Good carb source.', recommendation: 'Enjoy!' }
+        //         }
+        //     },
 
-            // ========== FRUITS ==========
-            'apple': {
-                name: 'Apple', emoji: '🍎', calories: 95, carbs: 25, protein: 0.5, fat: 0.3, sodium: 2, sugar: 19,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High fiber balances sugar.', recommendation: 'Enjoy!' },
-                    'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-healthy.', recommendation: 'Great!' },
-                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Low fat, high fiber.', recommendation: 'Perfect!' },
-                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Packed with vitamins.', recommendation: 'Daily!' }
-                }
-            },
-            'banana': {
-                name: 'Banana', emoji: '🍌', calories: 105, carbs: 27, protein: 1, fat: 0.4, sodium: 1, sugar: 14,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'MODERATION', detail: '14g sugar.', recommendation: 'Half banana.' },
-                    'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'High potassium!', recommendation: 'Great!' },
-                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Excellent!' },
-                    'None': { level: 'safe', message: 'HEALTHY', detail: 'Energy-boosting.', recommendation: 'Great snack!' }
-                }
-            },
-            'orange': {
-                name: 'Orange', emoji: '🍊', calories: 62, carbs: 15, protein: 1, fat: 0.2, sodium: 0, sugar: 12,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High fiber.', recommendation: 'One orange OK!' },
-                    'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Zero sodium!', recommendation: 'Perfect!' },
-                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Heart-protective.', recommendation: 'Great!' },
-                    'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'High vitamin C.', recommendation: 'Daily!' }
-                }
-            },
-            'mango': {
-                name: 'Mango', emoji: '🥭', calories: 135, carbs: 35, protein: 1, fat: 0.6, sodium: 3, sugar: 31,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'LIMIT', detail: '31g sugar.', recommendation: 'Small portion.' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Enjoy!' },
-                    'Heart Disease': { level: 'safe', message: 'GOOD', detail: 'Low fat.', recommendation: 'Good choice!' },
-                    'None': { level: 'safe', message: 'DELICIOUS', detail: 'Tropical fruit.', recommendation: 'Enjoy!' }
-                }
-            },
-            'watermelon': {
-                name: 'Watermelon', emoji: '🍉', calories: 46, carbs: 12, protein: 1, fat: 0.2, sodium: 2, sugar: 9,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'Mostly water, low calories.', recommendation: 'Enjoy!' },
-                    'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Very low sodium.', recommendation: 'Perfect!' },
-                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Hydrating, low fat.', recommendation: 'Great!' },
-                    'None': { level: 'safe', message: 'REFRESHING', detail: 'Hydrating fruit.', recommendation: 'Enjoy!' }
-                }
-            },
-            'grapes': {
-                name: 'Grapes', emoji: '🍇', calories: 104, carbs: 27, protein: 1, fat: 0.2, sodium: 3, sugar: 23,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'SMALL PORTION', detail: '23g sugar.', recommendation: 'Limit to 1/2 cup.' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Good!' },
-                    'Heart Disease': { level: 'safe', message: 'GOOD', detail: 'Antioxidant-rich.', recommendation: 'Enjoy!' },
-                    'None': { level: 'safe', message: 'SWEET TREAT', detail: 'Natural candy.', recommendation: 'Snack option!' }
-                }
-            },
+        //     // ========== FRUITS ==========
+        //     'apple': {
+        //         name: 'Apple', emoji: '🍎', calories: 95, carbs: 25, protein: 0.5, fat: 0.3, sodium: 2, sugar: 19,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High fiber balances sugar.', recommendation: 'Enjoy!' },
+        //             'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-healthy.', recommendation: 'Great!' },
+        //             'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Low fat, high fiber.', recommendation: 'Perfect!' },
+        //             'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'Packed with vitamins.', recommendation: 'Daily!' }
+        //         }
+        //     },
+        //     'banana': {
+        //         name: 'Banana', emoji: '🍌', calories: 105, carbs: 27, protein: 1, fat: 0.4, sodium: 1, sugar: 14,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'MODERATION', detail: '14g sugar.', recommendation: 'Half banana.' },
+        //             'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'High potassium!', recommendation: 'Great!' },
+        //             'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Excellent!' },
+        //             'None': { level: 'safe', message: 'HEALTHY', detail: 'Energy-boosting.', recommendation: 'Great snack!' }
+        //         }
+        //     },
+        //     'orange': {
+        //         name: 'Orange', emoji: '🍊', calories: 62, carbs: 15, protein: 1, fat: 0.2, sodium: 0, sugar: 12,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High fiber.', recommendation: 'One orange OK!' },
+        //             'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Zero sodium!', recommendation: 'Perfect!' },
+        //             'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Heart-protective.', recommendation: 'Great!' },
+        //             'None': { level: 'safe', message: 'VERY HEALTHY', detail: 'High vitamin C.', recommendation: 'Daily!' }
+        //         }
+        //     },
+        //     'mango': {
+        //         name: 'Mango', emoji: '🥭', calories: 135, carbs: 35, protein: 1, fat: 0.6, sodium: 3, sugar: 31,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'LIMIT', detail: '31g sugar.', recommendation: 'Small portion.' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium.', recommendation: 'Enjoy!' },
+        //             'Heart Disease': { level: 'safe', message: 'GOOD', detail: 'Low fat.', recommendation: 'Good choice!' },
+        //             'None': { level: 'safe', message: 'DELICIOUS', detail: 'Tropical fruit.', recommendation: 'Enjoy!' }
+        //         }
+        //     },
+        //     'watermelon': {
+        //         name: 'Watermelon', emoji: '🍉', calories: 46, carbs: 12, protein: 1, fat: 0.2, sodium: 2, sugar: 9,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'GOOD', detail: 'Mostly water, low calories.', recommendation: 'Enjoy!' },
+        //             'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Very low sodium.', recommendation: 'Perfect!' },
+        //             'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Hydrating, low fat.', recommendation: 'Great!' },
+        //             'None': { level: 'safe', message: 'REFRESHING', detail: 'Hydrating fruit.', recommendation: 'Enjoy!' }
+        //         }
+        //     },
+        //     'grapes': {
+        //         name: 'Grapes', emoji: '🍇', calories: 104, carbs: 27, protein: 1, fat: 0.2, sodium: 3, sugar: 23,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'SMALL PORTION', detail: '23g sugar.', recommendation: 'Limit to 1/2 cup.' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Heart-friendly.', recommendation: 'Good!' },
+        //             'Heart Disease': { level: 'safe', message: 'GOOD', detail: 'Antioxidant-rich.', recommendation: 'Enjoy!' },
+        //             'None': { level: 'safe', message: 'SWEET TREAT', detail: 'Natural candy.', recommendation: 'Snack option!' }
+        //         }
+        //     },
 
-            // ========== RICE & GRAINS ==========
-            'white rice': {
-                name: 'White Rice', emoji: '🍚', calories: 205, carbs: 45, protein: 4, fat: 0.4, sodium: 2, sugar: 0,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'EAT LESS', detail: '45g carbs, high GI.', recommendation: 'Half cup max.' },
-                    'Hypertension': { level: 'safe', message: 'SAFE', detail: 'Low sodium.', recommendation: 'OK!' },
-                    'Heart Disease': { level: 'safe', message: 'SAFE', detail: 'Low fat.', recommendation: 'Good!' },
-                    'None': { level: 'safe', message: 'STAPLE', detail: 'Main energy source.', recommendation: 'Enjoy!' }
-                }
-            },
-            'rice': {
-                name: 'White Rice', emoji: '🍚', calories: 205, carbs: 45, protein: 4, fat: 0.4, sodium: 2, sugar: 0,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'EAT LESS', detail: '45g carbs.', recommendation: 'Half cup.' },
-                    'Hypertension': { level: 'safe', message: 'SAFE', detail: 'Low sodium.', recommendation: 'OK!' },
-                    'Heart Disease': { level: 'safe', message: 'SAFE', detail: 'Low fat.', recommendation: 'Good!' },
-                    'None': { level: 'safe', message: 'STAPLE', detail: 'Staple food.', recommendation: 'Enjoy!' }
-                }
-            },
-            'brown rice': {
-                name: 'Brown Rice', emoji: '🍚', calories: 216, carbs: 45, protein: 5, fat: 2, sodium: 10, sugar: 1,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'BETTER CHOICE', detail: 'Lower GI than white rice.', recommendation: 'Great alternative!' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium, high fiber.', recommendation: 'Perfect!' },
-                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Whole grain!', recommendation: 'Choose this!' },
-                    'None': { level: 'safe', message: 'HEALTHIER', detail: 'More nutritious.', recommendation: 'Better choice!' }
-                }
-            },
-            'pasta': {
-                name: 'Pasta', emoji: '🍝', calories: 221, carbs: 43, protein: 8, fat: 1, sodium: 6, sugar: 2,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'MODERATE', detail: '43g carbs.', recommendation: 'Small portion.' },
-                    'Hypertension': { level: 'safe', message: 'OK', detail: 'Low sodium.', recommendation: 'Watch sauce!' },
-                    'Heart Disease': { level: 'safe', message: 'MODERATE', detail: 'Low fat.', recommendation: 'Whole wheat better.' },
-                    'None': { level: 'safe', message: 'COMMON', detail: 'Carb source.', recommendation: 'Moderate portions.' }
-                }
-            },
+        //     // ========== RICE & GRAINS ==========
+        //     'white rice': {
+        //         name: 'White Rice', emoji: '🍚', calories: 205, carbs: 45, protein: 4, fat: 0.4, sodium: 2, sugar: 0,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'EAT LESS', detail: '45g carbs, high GI.', recommendation: 'Half cup max.' },
+        //             'Hypertension': { level: 'safe', message: 'SAFE', detail: 'Low sodium.', recommendation: 'OK!' },
+        //             'Heart Disease': { level: 'safe', message: 'SAFE', detail: 'Low fat.', recommendation: 'Good!' },
+        //             'None': { level: 'safe', message: 'STAPLE', detail: 'Main energy source.', recommendation: 'Enjoy!' }
+        //         }
+        //     },
+        //     'rice': {
+        //         name: 'White Rice', emoji: '🍚', calories: 205, carbs: 45, protein: 4, fat: 0.4, sodium: 2, sugar: 0,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'EAT LESS', detail: '45g carbs.', recommendation: 'Half cup.' },
+        //             'Hypertension': { level: 'safe', message: 'SAFE', detail: 'Low sodium.', recommendation: 'OK!' },
+        //             'Heart Disease': { level: 'safe', message: 'SAFE', detail: 'Low fat.', recommendation: 'Good!' },
+        //             'None': { level: 'safe', message: 'STAPLE', detail: 'Staple food.', recommendation: 'Enjoy!' }
+        //         }
+        //     },
+        //     'brown rice': {
+        //         name: 'Brown Rice', emoji: '🍚', calories: 216, carbs: 45, protein: 5, fat: 2, sodium: 10, sugar: 1,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'BETTER CHOICE', detail: 'Lower GI than white rice.', recommendation: 'Great alternative!' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Low sodium, high fiber.', recommendation: 'Perfect!' },
+        //             'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Whole grain!', recommendation: 'Choose this!' },
+        //             'None': { level: 'safe', message: 'HEALTHIER', detail: 'More nutritious.', recommendation: 'Better choice!' }
+        //         }
+        //     },
+        //     'pasta': {
+        //         name: 'Pasta', emoji: '🍝', calories: 221, carbs: 43, protein: 8, fat: 1, sodium: 6, sugar: 2,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'MODERATE', detail: '43g carbs.', recommendation: 'Small portion.' },
+        //             'Hypertension': { level: 'safe', message: 'OK', detail: 'Low sodium.', recommendation: 'Watch sauce!' },
+        //             'Heart Disease': { level: 'safe', message: 'MODERATE', detail: 'Low fat.', recommendation: 'Whole wheat better.' },
+        //             'None': { level: 'safe', message: 'COMMON', detail: 'Carb source.', recommendation: 'Moderate portions.' }
+        //         }
+        //     },
 
-            // ========== SNACKS ==========
-            'chips': {
-                name: 'Potato Chips', emoji: '🥔', calories: 152, carbs: 15, protein: 2, fat: 10, sodium: 149, sugar: 0.2,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'AVOID', detail: 'High carbs, high fat.', recommendation: 'Rare treat only.' },
-                    'Hypertension': { level: 'danger', message: 'DO NOT EAT', detail: '149mg sodium per oz!', recommendation: 'Avoid!' },
-                    'Heart Disease': { level: 'danger', message: 'AVOID', detail: '10g fat per serving.', recommendation: 'Choose nuts instead.' },
-                    'None': { level: 'warning', message: 'JUNK FOOD', detail: 'Low nutrition.', recommendation: 'Rare treat.' }
-                }
-            },
-            'nuts': {
-                name: 'Mixed Nuts', emoji: '🥜', calories: 166, carbs: 6, protein: 5, fat: 14, sodium: 3, sugar: 1,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low carbs, healthy fats.', recommendation: 'Great snack!' },
-                    'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Unsalted best!', recommendation: 'Choose unsalted!' },
-                    'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-healthy fats!', recommendation: 'Eat often!' },
-                    'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Healthy fat source.', recommendation: 'Small portions!' }
-                }
-            },
-            'cookie': {
-                name: 'Cookie', emoji: '🍪', calories: 142, carbs: 17, protein: 2, fat: 7, sodium: 82, sugar: 11,
-                warnings: {
-                    'Diabetes': { level: 'danger', message: 'AVOID', detail: '11g sugar!', recommendation: 'Skip it!' },
-                    'Hypertension': { level: 'warning', message: 'OCCASIONAL', detail: '82mg sodium.', recommendation: 'Rare treat.' },
-                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '7g fat.', recommendation: 'Rare treat.' },
-                    'None': { level: 'warning', message: 'DESSERT', detail: 'High sugar.', recommendation: 'Occasional.' }
-                }
-            },
-            'yogurt': {
-                name: 'Yogurt', emoji: '🥛', calories: 149, carbs: 11, protein: 9, fat: 8, sodium: 113, sugar: 11,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein, probiotics.', recommendation: 'Choose plain!' },
-                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: '113mg sodium.', recommendation: 'Good option!' },
-                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Probiotic-rich.', recommendation: 'Low-fat best!' },
-                    'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Gut-healthy.', recommendation: 'Great snack!' }
-                }
-            },
+        //     // ========== SNACKS ==========
+        //     'chips': {
+        //         name: 'Potato Chips', emoji: '🥔', calories: 152, carbs: 15, protein: 2, fat: 10, sodium: 149, sugar: 0.2,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'AVOID', detail: 'High carbs, high fat.', recommendation: 'Rare treat only.' },
+        //             'Hypertension': { level: 'danger', message: 'DO NOT EAT', detail: '149mg sodium per oz!', recommendation: 'Avoid!' },
+        //             'Heart Disease': { level: 'danger', message: 'AVOID', detail: '10g fat per serving.', recommendation: 'Choose nuts instead.' },
+        //             'None': { level: 'warning', message: 'JUNK FOOD', detail: 'Low nutrition.', recommendation: 'Rare treat.' }
+        //         }
+        //     },
+        //     'nuts': {
+        //         name: 'Mixed Nuts', emoji: '🥜', calories: 166, carbs: 6, protein: 5, fat: 14, sodium: 3, sugar: 1,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Low carbs, healthy fats.', recommendation: 'Great snack!' },
+        //             'Hypertension': { level: 'safe', message: 'HEALTHY', detail: 'Unsalted best!', recommendation: 'Choose unsalted!' },
+        //             'Heart Disease': { level: 'safe', message: 'EXCELLENT', detail: 'Heart-healthy fats!', recommendation: 'Eat often!' },
+        //             'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Healthy fat source.', recommendation: 'Small portions!' }
+        //         }
+        //     },
+        //     'cookie': {
+        //         name: 'Cookie', emoji: '🍪', calories: 142, carbs: 17, protein: 2, fat: 7, sodium: 82, sugar: 11,
+        //         warnings: {
+        //             'Diabetes': { level: 'danger', message: 'AVOID', detail: '11g sugar!', recommendation: 'Skip it!' },
+        //             'Hypertension': { level: 'warning', message: 'OCCASIONAL', detail: '82mg sodium.', recommendation: 'Rare treat.' },
+        //             'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '7g fat.', recommendation: 'Rare treat.' },
+        //             'None': { level: 'warning', message: 'DESSERT', detail: 'High sugar.', recommendation: 'Occasional.' }
+        //         }
+        //     },
+        //     'yogurt': {
+        //         name: 'Yogurt', emoji: '🥛', calories: 149, carbs: 11, protein: 9, fat: 8, sodium: 113, sugar: 11,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein, probiotics.', recommendation: 'Choose plain!' },
+        //             'Hypertension': { level: 'safe', message: 'MODERATE', detail: '113mg sodium.', recommendation: 'Good option!' },
+        //             'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Probiotic-rich.', recommendation: 'Low-fat best!' },
+        //             'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Gut-healthy.', recommendation: 'Great snack!' }
+        //         }
+        //     },
 
-            // ========== BEVERAGES ==========
-            'coffee': {
-                name: 'Black Coffee', emoji: '☕', calories: 2, carbs: 0, protein: 0.3, fat: 0, sodium: 5, sugar: 0,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Zero carbs, zero sugar.', recommendation: 'Enjoy black!' },
-                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'Limit caffeine.', recommendation: '1-2 cups OK!' },
-                    'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Antioxidant-rich.', recommendation: 'Black is best!' },
-                    'None': { level: 'safe', message: 'GOOD', detail: 'Energizing.', recommendation: 'Enjoy!' }
-                }
-            },
-            'milk': {
-                name: 'Milk', emoji: '🥛', calories: 149, carbs: 12, protein: 8, fat: 8, sodium: 107, sugar: 12,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'MODERATE', detail: '12g natural sugar.', recommendation: 'One glass OK!' },
-                    'Hypertension': { level: 'safe', message: 'GOOD', detail: 'Calcium-rich.', recommendation: 'Low-fat best!' },
-                    'Heart Disease': { level: 'safe', message: 'MODERATE', detail: '8g fat.', recommendation: 'Choose low-fat!' },
-                    'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Calcium and protein.', recommendation: 'Great option!' }
-                }
-            },
-            'juice': {
-                name: 'Orange Juice', emoji: '🧃', calories: 112, carbs: 26, protein: 2, fat: 0.5, sodium: 2, sugar: 21,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'LIMIT', detail: '21g sugar!', recommendation: 'Eat whole fruit instead.' },
-                    'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'High in sugar.', recommendation: 'Small glass.' },
-                    'Heart Disease': { level: 'safe', message: 'OK', detail: 'Natural sugar.', recommendation: 'Small portions.' },
-                    'None': { level: 'warning', message: 'HIGH SUGAR', detail: 'Better to eat fruit.', recommendation: 'Limit intake.' }
-                }
-            },
-            'soft drink': {
-                name: 'Soft Drink', emoji: '🥤', calories: 139, carbs: 35, protein: 0, fat: 0, sodium: 15, sugar: 35,
-                warnings: {
-                    'Diabetes': { level: 'danger', message: 'NEVER', detail: '35g sugar!', recommendation: 'NEVER drink!' },
-                    'Hypertension': { level: 'danger', message: 'AVOID', detail: 'High sugar.', recommendation: 'Water instead!' },
-                    'Heart Disease': { level: 'danger', message: 'DO NOT', detail: 'Empty calories.', recommendation: 'Switch to water!' },
-                    'None': { level: 'danger', message: 'UNHEALTHY', detail: 'No nutrition.', recommendation: 'Choose water!' }
-                }
-            },
-            'water': {
-                name: 'Water', emoji: '💧', calories: 0, carbs: 0, protein: 0, fat: 0, sodium: 0, sugar: 0,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'PERFECT', detail: 'Best beverage!', recommendation: 'Drink 8 glasses!' },
-                    'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Essential!', recommendation: 'Stay hydrated!' },
-                    'Heart Disease': { level: 'safe', message: 'PERFECT', detail: 'Best choice!', recommendation: 'Drink plenty!' },
-                    'None': { level: 'safe', message: 'ESSENTIAL', detail: 'Life-giving!', recommendation: 'Drink often!' }
-                }
-            },
+        //     // ========== BEVERAGES ==========
+        //     'coffee': {
+        //         name: 'Black Coffee', emoji: '☕', calories: 2, carbs: 0, protein: 0.3, fat: 0, sodium: 5, sugar: 0,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'EXCELLENT', detail: 'Zero carbs, zero sugar.', recommendation: 'Enjoy black!' },
+        //             'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'Limit caffeine.', recommendation: '1-2 cups OK!' },
+        //             'Heart Disease': { level: 'safe', message: 'HEALTHY', detail: 'Antioxidant-rich.', recommendation: 'Black is best!' },
+        //             'None': { level: 'safe', message: 'GOOD', detail: 'Energizing.', recommendation: 'Enjoy!' }
+        //         }
+        //     },
+        //     'milk': {
+        //         name: 'Milk', emoji: '🥛', calories: 149, carbs: 12, protein: 8, fat: 8, sodium: 107, sugar: 12,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'MODERATE', detail: '12g natural sugar.', recommendation: 'One glass OK!' },
+        //             'Hypertension': { level: 'safe', message: 'GOOD', detail: 'Calcium-rich.', recommendation: 'Low-fat best!' },
+        //             'Heart Disease': { level: 'safe', message: 'MODERATE', detail: '8g fat.', recommendation: 'Choose low-fat!' },
+        //             'None': { level: 'safe', message: 'NUTRITIOUS', detail: 'Calcium and protein.', recommendation: 'Great option!' }
+        //         }
+        //     },
+        //     'juice': {
+        //         name: 'Orange Juice', emoji: '🧃', calories: 112, carbs: 26, protein: 2, fat: 0.5, sodium: 2, sugar: 21,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'LIMIT', detail: '21g sugar!', recommendation: 'Eat whole fruit instead.' },
+        //             'Hypertension': { level: 'safe', message: 'MODERATE', detail: 'High in sugar.', recommendation: 'Small glass.' },
+        //             'Heart Disease': { level: 'safe', message: 'OK', detail: 'Natural sugar.', recommendation: 'Small portions.' },
+        //             'None': { level: 'warning', message: 'HIGH SUGAR', detail: 'Better to eat fruit.', recommendation: 'Limit intake.' }
+        //         }
+        //     },
+        //     'soft drink': {
+        //         name: 'Soft Drink', emoji: '🥤', calories: 139, carbs: 35, protein: 0, fat: 0, sodium: 15, sugar: 35,
+        //         warnings: {
+        //             'Diabetes': { level: 'danger', message: 'NEVER', detail: '35g sugar!', recommendation: 'NEVER drink!' },
+        //             'Hypertension': { level: 'danger', message: 'AVOID', detail: 'High sugar.', recommendation: 'Water instead!' },
+        //             'Heart Disease': { level: 'danger', message: 'DO NOT', detail: 'Empty calories.', recommendation: 'Switch to water!' },
+        //             'None': { level: 'danger', message: 'UNHEALTHY', detail: 'No nutrition.', recommendation: 'Choose water!' }
+        //         }
+        //     },
+        //     'water': {
+        //         name: 'Water', emoji: '💧', calories: 0, carbs: 0, protein: 0, fat: 0, sodium: 0, sugar: 0,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'PERFECT', detail: 'Best beverage!', recommendation: 'Drink 8 glasses!' },
+        //             'Hypertension': { level: 'safe', message: 'EXCELLENT', detail: 'Essential!', recommendation: 'Stay hydrated!' },
+        //             'Heart Disease': { level: 'safe', message: 'PERFECT', detail: 'Best choice!', recommendation: 'Drink plenty!' },
+        //             'None': { level: 'safe', message: 'ESSENTIAL', detail: 'Life-giving!', recommendation: 'Drink often!' }
+        //         }
+        //     },
 
-            // ========== FAST FOOD ==========
-            'burger': {
-                name: 'Burger', emoji: '🍔', calories: 354, carbs: 32, protein: 17, fat: 17, sodium: 497, sugar: 6,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'EAT LESS', detail: 'High carbs and fat.', recommendation: 'Small size only.' },
-                    'Hypertension': { level: 'warning', message: 'MODERATE', detail: '497mg sodium.', recommendation: 'Skip fries!' },
-                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '17g fat.', recommendation: 'Grilled chicken better.' },
-                    'None': { level: 'warning', message: 'OCCASIONAL', detail: 'High calories.', recommendation: 'Treat meal.' }
-                }
-            },
-            'pizza': {
-                name: 'Pizza', emoji: '🍕', calories: 285, carbs: 36, protein: 12, fat: 10, sodium: 640, sugar: 4,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'LIMIT', detail: 'High carbs.', recommendation: '1 slice max.' },
-                    'Hypertension': { level: 'danger', message: 'AVOID', detail: '640mg sodium per slice!', recommendation: 'Avoid!' },
-                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: 'High fat and sodium.', recommendation: 'Rare treat.' },
-                    'None': { level: 'warning', message: 'OCCASIONAL', detail: 'High calories.', recommendation: 'Weekend treat.' }
-                }
-            },
-            'fries': {
-                name: 'French Fries', emoji: '🍟', calories: 312, carbs: 41, protein: 4, fat: 15, sodium: 246, sugar: 0.3,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'AVOID', detail: '41g carbs, fried.', recommendation: 'Skip it!' },
-                    'Hypertension': { level: 'danger', message: 'HIGH SODIUM', detail: '246mg sodium.', recommendation: 'Avoid!' },
-                    'Heart Disease': { level: 'danger', message: 'UNHEALTHY', detail: '15g fat, fried.', recommendation: 'Never!' },
-                    'None': { level: 'warning', message: 'JUNK FOOD', detail: 'Fried, high calorie.', recommendation: 'Rare treat.' }
-                }
-            },
-            'hotdog': {
-                name: 'Hot Dog', emoji: '🌭', calories: 151, carbs: 2, protein: 5, fat: 13, sodium: 567, sugar: 1,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'PROCESSED', detail: 'Processed meat.', recommendation: 'Occasional only.' },
-                    'Hypertension': { level: 'danger', message: 'HIGH SODIUM', detail: '567mg sodium!', recommendation: 'Avoid!' },
-                    'Heart Disease': { level: 'danger', message: 'UNHEALTHY', detail: 'Processed, high fat.', recommendation: 'Avoid!' },
-                    'None': { level: 'warning', message: 'PROCESSED', detail: 'Processed meat.', recommendation: 'Rare treat.' }
-                }
-            },
+        //     // ========== FAST FOOD ==========
+        //     'burger': {
+        //         name: 'Burger', emoji: '🍔', calories: 354, carbs: 32, protein: 17, fat: 17, sodium: 497, sugar: 6,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'EAT LESS', detail: 'High carbs and fat.', recommendation: 'Small size only.' },
+        //             'Hypertension': { level: 'warning', message: 'MODERATE', detail: '497mg sodium.', recommendation: 'Skip fries!' },
+        //             'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '17g fat.', recommendation: 'Grilled chicken better.' },
+        //             'None': { level: 'warning', message: 'OCCASIONAL', detail: 'High calories.', recommendation: 'Treat meal.' }
+        //         }
+        //     },
+        //     'pizza': {
+        //         name: 'Pizza', emoji: '🍕', calories: 285, carbs: 36, protein: 12, fat: 10, sodium: 640, sugar: 4,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'LIMIT', detail: 'High carbs.', recommendation: '1 slice max.' },
+        //             'Hypertension': { level: 'danger', message: 'AVOID', detail: '640mg sodium per slice!', recommendation: 'Avoid!' },
+        //             'Heart Disease': { level: 'warning', message: 'LIMIT', detail: 'High fat and sodium.', recommendation: 'Rare treat.' },
+        //             'None': { level: 'warning', message: 'OCCASIONAL', detail: 'High calories.', recommendation: 'Weekend treat.' }
+        //         }
+        //     },
+        //     'fries': {
+        //         name: 'French Fries', emoji: '🍟', calories: 312, carbs: 41, protein: 4, fat: 15, sodium: 246, sugar: 0.3,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'AVOID', detail: '41g carbs, fried.', recommendation: 'Skip it!' },
+        //             'Hypertension': { level: 'danger', message: 'HIGH SODIUM', detail: '246mg sodium.', recommendation: 'Avoid!' },
+        //             'Heart Disease': { level: 'danger', message: 'UNHEALTHY', detail: '15g fat, fried.', recommendation: 'Never!' },
+        //             'None': { level: 'warning', message: 'JUNK FOOD', detail: 'Fried, high calorie.', recommendation: 'Rare treat.' }
+        //         }
+        //     },
+        //     'hotdog': {
+        //         name: 'Hot Dog', emoji: '🌭', calories: 151, carbs: 2, protein: 5, fat: 13, sodium: 567, sugar: 1,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'PROCESSED', detail: 'Processed meat.', recommendation: 'Occasional only.' },
+        //             'Hypertension': { level: 'danger', message: 'HIGH SODIUM', detail: '567mg sodium!', recommendation: 'Avoid!' },
+        //             'Heart Disease': { level: 'danger', message: 'UNHEALTHY', detail: 'Processed, high fat.', recommendation: 'Avoid!' },
+        //             'None': { level: 'warning', message: 'PROCESSED', detail: 'Processed meat.', recommendation: 'Rare treat.' }
+        //         }
+        //     },
 
-            // ========== DESSERTS ==========
-            'ice cream': {
-                name: 'Ice Cream', emoji: '🍨', calories: 207, carbs: 24, protein: 4, fat: 11, sodium: 80, sugar: 21,
-                warnings: {
-                    'Diabetes': { level: 'danger', message: 'DO NOT EAT', detail: '21g sugar!', recommendation: 'AVOID!' },
-                    'Hypertension': { level: 'warning', message: 'LIMIT', detail: 'High saturated fat.', recommendation: 'Rare treat.' },
-                    'Heart Disease': { level: 'danger', message: 'AVOID', detail: '11g fat.', recommendation: 'Choose sorbet!' },
-                    'None': { level: 'warning', message: 'DESSERT', detail: 'High sugar.', recommendation: 'Occasional treat.' }
-                }
-            },
-            'cake': {
-                name: 'Cake', emoji: '🍰', calories: 235, carbs: 30, protein: 3, fat: 12, sodium: 220, sugar: 20,
-                warnings: {
-                    'Diabetes': { level: 'danger', message: 'AVOID', detail: '20g sugar!', recommendation: 'Skip it!' },
-                    'Hypertension': { level: 'warning', message: 'HIGH SODIUM', detail: '220mg sodium.', recommendation: 'Birthday only!' },
-                    'Heart Disease': { level: 'warning', message: 'UNHEALTHY', detail: '12g fat.', recommendation: 'Special occasions.' },
-                    'None': { level: 'warning', message: 'DESSERT', detail: 'High sugar and fat.', recommendation: 'Celebrations only!' }
-                }
-            },
-            'chocolate': {
-                name: 'Chocolate Bar', emoji: '🍫', calories: 235, carbs: 26, protein: 3, fat: 13, sodium: 30, sugar: 23,
-                warnings: {
-                    'Diabetes': { level: 'danger', message: 'HIGH SUGAR', detail: '23g sugar!', recommendation: 'Dark chocolate better.' },
-                    'Hypertension': { level: 'warning', message: 'MODERATE', detail: 'High in fat.', recommendation: 'Small piece.' },
-                    'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '13g fat.', recommendation: 'Dark chocolate better.' },
-                    'None': { level: 'warning', message: 'TREAT', detail: 'High sugar and fat.', recommendation: 'Small portions!' }
-                }
-            },
+        //     // ========== DESSERTS ==========
+        //     'ice cream': {
+        //         name: 'Ice Cream', emoji: '🍨', calories: 207, carbs: 24, protein: 4, fat: 11, sodium: 80, sugar: 21,
+        //         warnings: {
+        //             'Diabetes': { level: 'danger', message: 'DO NOT EAT', detail: '21g sugar!', recommendation: 'AVOID!' },
+        //             'Hypertension': { level: 'warning', message: 'LIMIT', detail: 'High saturated fat.', recommendation: 'Rare treat.' },
+        //             'Heart Disease': { level: 'danger', message: 'AVOID', detail: '11g fat.', recommendation: 'Choose sorbet!' },
+        //             'None': { level: 'warning', message: 'DESSERT', detail: 'High sugar.', recommendation: 'Occasional treat.' }
+        //         }
+        //     },
+        //     'cake': {
+        //         name: 'Cake', emoji: '🍰', calories: 235, carbs: 30, protein: 3, fat: 12, sodium: 220, sugar: 20,
+        //         warnings: {
+        //             'Diabetes': { level: 'danger', message: 'AVOID', detail: '20g sugar!', recommendation: 'Skip it!' },
+        //             'Hypertension': { level: 'warning', message: 'HIGH SODIUM', detail: '220mg sodium.', recommendation: 'Birthday only!' },
+        //             'Heart Disease': { level: 'warning', message: 'UNHEALTHY', detail: '12g fat.', recommendation: 'Special occasions.' },
+        //             'None': { level: 'warning', message: 'DESSERT', detail: 'High sugar and fat.', recommendation: 'Celebrations only!' }
+        //         }
+        //     },
+        //     'chocolate': {
+        //         name: 'Chocolate Bar', emoji: '🍫', calories: 235, carbs: 26, protein: 3, fat: 13, sodium: 30, sugar: 23,
+        //         warnings: {
+        //             'Diabetes': { level: 'danger', message: 'HIGH SUGAR', detail: '23g sugar!', recommendation: 'Dark chocolate better.' },
+        //             'Hypertension': { level: 'warning', message: 'MODERATE', detail: 'High in fat.', recommendation: 'Small piece.' },
+        //             'Heart Disease': { level: 'warning', message: 'LIMIT', detail: '13g fat.', recommendation: 'Dark chocolate better.' },
+        //             'None': { level: 'warning', message: 'TREAT', detail: 'High sugar and fat.', recommendation: 'Small portions!' }
+        //         }
+        //     },
 
-            // ========== FILIPINO FOODS ==========
-            'adobo': {
-                name: 'Chicken Adobo', emoji: '🍗', calories: 290, carbs: 8, protein: 32, fat: 15, sodium: 680, sugar: 3,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein.', recommendation: 'Enjoy!' },
-                    'Hypertension': { level: 'warning', message: 'WATCH SODIUM', detail: '680mg sodium.', recommendation: 'Less sauce!' },
-                    'Heart Disease': { level: 'warning', message: 'MODERATE', detail: '15g fat.', recommendation: 'Remove skin!' },
-                    'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Classic Filipino.', recommendation: 'Enjoy!' }
-                }
-            },
-            'sinigang': {
-                name: 'Sinigang', emoji: '🍲', calories: 180, carbs: 12, protein: 18, fat: 6, sodium: 850, sugar: 4,
-                warnings: {
-                    'Diabetes': { level: 'safe', message: 'HEALTHY', detail: 'Low carbs, vegetables.', recommendation: 'Great choice!' },
-                    'Hypertension': { level: 'danger', message: 'HIGH SODIUM', detail: '850mg sodium!', recommendation: 'Less bouillon!' },
-                    'Heart Disease': { level: 'safe', message: 'MODERATE', detail: 'Vegetable-rich.', recommendation: 'Good!' },
-                    'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Sour soup.', recommendation: 'Enjoy!' }
-                }
-            },
-            'lumpia': {
-                name: 'Lumpia', emoji: '🌯', calories: 140, carbs: 15, protein: 5, fat: 7, sodium: 280, sugar: 1,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'FRIED', detail: 'Fried food.', recommendation: '1-2 pieces max.' },
-                    'Hypertension': { level: 'warning', message: 'MODERATE', detail: '280mg sodium.', recommendation: 'Limit intake.' },
-                    'Heart Disease': { level: 'warning', message: 'FRIED', detail: '7g fat, deep fried.', recommendation: 'Baked better!' },
-                    'None': { level: 'warning', message: 'FRIED FOOD', detail: 'High in fat.', recommendation: 'Occasional treat!' }
-                }
-            },
-            'pancit': {
-                name: 'Pancit', emoji: '🍜', calories: 220, carbs: 30, protein: 8, fat: 8, sodium: 680, sugar: 2,
-                warnings: {
-                    'Diabetes': { level: 'warning', message: 'MODERATE', detail: '30g carbs from noodles.', recommendation: 'Small portion.' },
-                    'Hypertension': { level: 'warning', message: 'HIGH SODIUM', detail: '680mg sodium.', recommendation: 'Limit soy sauce!' },
-                    'Heart Disease': { level: 'safe', message: 'MODERATE', detail: '8g fat.', recommendation: 'Add vegetables!' },
-                    'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Noodle dish.', recommendation: 'Enjoy!' }
-                }
-            }
-        }       
+        //     // ========== FILIPINO FOODS ==========
+        //     'adobo': {
+        //         name: 'Chicken Adobo', emoji: '🍗', calories: 290, carbs: 8, protein: 32, fat: 15, sodium: 680, sugar: 3,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'GOOD', detail: 'High protein.', recommendation: 'Enjoy!' },
+        //             'Hypertension': { level: 'warning', message: 'WATCH SODIUM', detail: '680mg sodium.', recommendation: 'Less sauce!' },
+        //             'Heart Disease': { level: 'warning', message: 'MODERATE', detail: '15g fat.', recommendation: 'Remove skin!' },
+        //             'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Classic Filipino.', recommendation: 'Enjoy!' }
+        //         }
+        //     },
+        //     'sinigang': {
+        //         name: 'Sinigang', emoji: '🍲', calories: 180, carbs: 12, protein: 18, fat: 6, sodium: 850, sugar: 4,
+        //         warnings: {
+        //             'Diabetes': { level: 'safe', message: 'HEALTHY', detail: 'Low carbs, vegetables.', recommendation: 'Great choice!' },
+        //             'Hypertension': { level: 'danger', message: 'HIGH SODIUM', detail: '850mg sodium!', recommendation: 'Less bouillon!' },
+        //             'Heart Disease': { level: 'safe', message: 'MODERATE', detail: 'Vegetable-rich.', recommendation: 'Good!' },
+        //             'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Sour soup.', recommendation: 'Enjoy!' }
+        //         }
+        //     },
+        //     'lumpia': {
+        //         name: 'Lumpia', emoji: '🌯', calories: 140, carbs: 15, protein: 5, fat: 7, sodium: 280, sugar: 1,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'FRIED', detail: 'Fried food.', recommendation: '1-2 pieces max.' },
+        //             'Hypertension': { level: 'warning', message: 'MODERATE', detail: '280mg sodium.', recommendation: 'Limit intake.' },
+        //             'Heart Disease': { level: 'warning', message: 'FRIED', detail: '7g fat, deep fried.', recommendation: 'Baked better!' },
+        //             'None': { level: 'warning', message: 'FRIED FOOD', detail: 'High in fat.', recommendation: 'Occasional treat!' }
+        //         }
+        //     },
+        //     'pancit': {
+        //         name: 'Pancit', emoji: '🍜', calories: 220, carbs: 30, protein: 8, fat: 8, sodium: 680, sugar: 2,
+        //         warnings: {
+        //             'Diabetes': { level: 'warning', message: 'MODERATE', detail: '30g carbs from noodles.', recommendation: 'Small portion.' },
+        //             'Hypertension': { level: 'warning', message: 'HIGH SODIUM', detail: '680mg sodium.', recommendation: 'Limit soy sauce!' },
+        //             'Heart Disease': { level: 'safe', message: 'MODERATE', detail: '8g fat.', recommendation: 'Add vegetables!' },
+        //             'None': { level: 'safe', message: 'TRADITIONAL', detail: 'Noodle dish.', recommendation: 'Enjoy!' }
+        //         }
+        //     }
+        // }       
         // Authentication functions
         // Add this function after setupDemoAccount()
 function switchAuthTab(tab) {

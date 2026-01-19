@@ -2876,7 +2876,7 @@ Respond in this EXACT JSON format (no markdown, no backticks):
     
     const foodEntry = {
         id: Date.now(),
-        name: foodName,  // ✅ Use the AI-detected name
+        name: foodName,
         calories: parseInt(calories),
         carbs: parseInt(carbs),
         protein: parseInt(protein),
@@ -2885,16 +2885,25 @@ Respond in this EXACT JSON format (no markdown, no backticks):
         sugar: parseInt(sugar),
         timestamp: timestamp,
         displayTime: displayTime,
-        aiGenerated: true  // ✅ Mark as AI-generated
+        aiGenerated: true,
+        emoji: '🍽️'  // You can extract this from the AI response if available
     };
     
-    foodLog.push(foodEntry);
-    saveData();
+    meals.push(foodEntry);  // ✅ CORRECT - use meals array
+    totalCals += foodEntry.calories;
+    
+    // Update macros
+    totalMacros.carbs += foodEntry.carbs;
+    totalMacros.protein += foodEntry.protein;
+    totalMacros.fat += foodEntry.fat;
+    totalMacros.sodium += foodEntry.sodium;
+    
+    saveUserProfile();  // ✅ Save to localStorage
     updateTracker();
+    updateMacros();     // ✅ Update macro display
     closeModal();
     showTab('tracker');
     
-    // Show success message
     alert(`✅ ${foodName} added to your tracker!`);
 }
 

@@ -2762,9 +2762,14 @@ Respond in this EXACT JSON format (no markdown, no backticks):
 //     }
 // }
         
-        function displayAIFood(foodName, data) {
+        function displayFood(foodName, data) {
     const { emoji, serving, calories, carbs, protein, fat, sodium, sugar } = data;
     const condition = userData.condition || 'None';
+    
+    // Capitalize first letter of each word for display
+    const displayName = foodName.split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
     
     // Generate dynamic warnings based on condition
     const warnings = generateDynamicWarnings({ calories, carbs, protein, fat, sodium, sugar }, condition);
@@ -2773,8 +2778,8 @@ Respond in this EXACT JSON format (no markdown, no backticks):
         <h2>✅ Food Analyzed!</h2>
         <div class="food-result">
             <div class="food-icon">${emoji || '🍽️'}</div>
-            <h3>${foodName}</h3>
-            <p class="detection-note" style="color: var(--primary); font-weight: 500;">🤖 Powered by Google Gemini AI</p>
+            <h3>${displayName}</h3>
+            <p class="detection-note" style="color: var(--primary); font-weight: 500;">🤖 Detected by Google Gemini AI</p>
             <p class="serving-size">📏 Serving: ${serving}</p>
         </div>
         
@@ -2816,7 +2821,7 @@ Respond in this EXACT JSON format (no markdown, no backticks):
         </div>
         
         <div class="modal-actions">
-            <button class="btn" onclick="saveAIFood('${foodName.replace(/'/g, "\'")}', ${calories}, ${carbs}, ${protein}, ${fat}, ${sodium}, ${sugar})">
+            <button class="btn" onclick="saveAIFood('${displayName.replace(/'/g, "\\'")}', ${calories}, ${carbs}, ${protein}, ${fat}, ${sodium}, ${sugar})">
                 ✅ Add to Tracker
             </button>
             <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
@@ -2864,39 +2869,34 @@ Respond in this EXACT JSON format (no markdown, no backticks):
             }
         }
         
-        function saveAIFood(name, calories, carbs, protein, fat, sodium, sugar) {
-            console.log('💾 Saving AI food:', name);
-            
-            const meal = {
-                id: Date.now(),
-                name: name,
-                emoji: '🤖',
-                calories: calories,
-                carbs: carbs,
-                protein: protein,
-                fat: fat,
-                sodium: sodium,
-                sugar: sugar,
-                timestamp: new Date().toLocaleString(),
-                source: 'AI'
-            };
-            
-            meals.push(meal);
-            totalCals += calories;
-            totalMacros.carbs += carbs;
-            totalMacros.protein += protein;
-            totalMacros.fat += fat;
-            totalMacros.sodium += sodium;
-            
-            saveUserProfile();
-            updateTracker();
-            updateMacros();
-            
-            closeModal();
-            
-            alert(`✅ ${name} added to your tracker!\n\n📊 AI-estimated nutritional data saved.`);
-            console.log('✅ AI food saved to tracker');
-        }
+        function saveAIFood(foodName, calories, carbs, protein, fat, sodium, sugar) {
+    const now = new Date();
+    const timestamp = now.toISOString();
+    const displayTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    
+    const foodEntry = {
+        id: Date.now(),
+        name: foodName,  // ✅ Use the AI-detected name
+        calories: parseInt(calories),
+        carbs: parseInt(carbs),
+        protein: parseInt(protein),
+        fat: parseInt(fat),
+        sodium: parseInt(sodium),
+        sugar: parseInt(sugar),
+        timestamp: timestamp,
+        displayTime: displayTime,
+        aiGenerated: true  // ✅ Mark as AI-generated
+    };
+    
+    foodLog.push(foodEntry);
+    saveData();
+    updateTracker();
+    closeModal();
+    showTab('tracker');
+    
+    // Show success message
+    alert(`✅ ${foodName} added to your tracker!`);
+}
 
         function showResults(foodKey, detectedName) {
             const food = foods[foodKey];
